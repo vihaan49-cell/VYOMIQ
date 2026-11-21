@@ -1,0 +1,30 @@
+# Node & Build artifacts
+node_tools/
+node_modules/
+client/node_modules/
+client/dist/
+dist/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.venv/
+
+# Environment and secrets
+.env
+.env.local
+*.log
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
