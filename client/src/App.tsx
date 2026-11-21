@@ -20,7 +20,7 @@ import { spaceAudio } from './utils/audio';
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<
     'home' | 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about'
-  >('home');
+  >('universe');
 
   const [selectedId, setSelectedId] = useState<string | null>('chandrayaan-3');
   const [selectedType, setSelectedType] = useState<'planet' | 'spacecraft' | 'all' | null>(

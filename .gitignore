@@ -2,8 +2,8 @@
 node_tools/
 node_modules/
 client/node_modules/
-client/dist/
-dist/
+# client/dist/ included so python server/app.py serves 3D frontend out of the box
+
 
 # Python
 __pycache__/
