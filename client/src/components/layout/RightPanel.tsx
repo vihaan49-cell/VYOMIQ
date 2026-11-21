@@ -16,6 +16,8 @@ import {
   FileText,
   Clock,
   Sparkles,
+  Images,
+  Info,
 } from 'lucide-react';
 import { Mission, ScientificInstrument, ScientificObservation } from '../../types';
 import { spaceAudio } from '../../utils/audio';
@@ -35,9 +37,10 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   onOpenObservation,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'specs' | 'instruments' | 'observations' | 'telemetry'
+    'overview' | 'specs' | 'instruments' | 'observations' | 'telemetry' | 'gallery'
   >('overview');
   const [expandedInstrumentId, setExpandedInstrumentId] = useState<string | null>(null);
+  const [expandedImageId, setExpandedImageId] = useState<string | null>(null);
 
   if (!mission) return null;
 
@@ -102,13 +105,14 @@ export const RightPanel: React.FC<RightPanelProps> = ({
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="grid grid-cols-5 border-b border-space-700/60 bg-space-950/60 font-mono text-[10px]">
+      <div className="grid grid-cols-6 border-b border-space-700/60 bg-space-950/60 font-mono text-[9px]">
         {[
           { id: 'overview', label: 'Overview', icon: FileText },
           { id: 'specs', label: 'Specs', icon: Cpu },
           { id: 'instruments', label: 'Payloads', icon: Layers },
           { id: 'observations', label: 'Science', icon: Database },
           { id: 'telemetry', label: 'Telemetry', icon: Activity },
+          { id: 'gallery', label: 'Gallery', icon: Sparkles },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -117,7 +121,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
               key={tab.id}
               onClick={() => {
                 spaceAudio.playClick();
-                setActiveTab(tab.id as typeof activeTab);
+                setActiveTab(tab.id as 'overview' | 'specs' | 'instruments' | 'observations' | 'telemetry' | 'gallery');
               }}
               className={`py-2 px-1 flex flex-col items-center justify-center space-y-1 transition-all ${
                 isActive
@@ -536,6 +540,100 @@ export const RightPanel: React.FC<RightPanelProps> = ({
             )}
           </div>
         )}
+        {/* TAB 6: SIGNATURE IMAGES GALLERY */}
+        {activeTab === 'gallery' && (() => {
+          const images = mission.signatureImages ?? [];
+          return (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-slate-400 font-mono text-[10px] uppercase pb-1 border-b border-space-800">
+                <span>Signature Science Images</span>
+                <span className="text-isro-gold font-bold">{images.length} Available</span>
+              </div>
+
+              {images.length === 0 && (
+                <div className="p-8 text-center text-slate-500 font-mono text-xs">
+                  No signature images archived for this mission yet.
+                </div>
+              )}
+
+              {images.map((img) => {
+                const isExpanded = expandedImageId === img.id;
+                return (
+                  <div
+                    key={img.id}
+                    className={`rounded-lg border overflow-hidden transition-all duration-300 ${
+                      isExpanded
+                        ? 'border-isro-gold/60 shadow-[0_0_16px_rgba(245,158,11,0.15)]'
+                        : 'border-space-700/50 hover:border-isro-gold/30'
+                    }`}
+                  >
+                    {/* Image */}
+                    <div
+                      className="relative cursor-pointer group"
+                      onClick={() => {
+                        spaceAudio.playClick();
+                        setExpandedImageId(isExpanded ? null : img.id);
+                      }}
+                    >
+                      <img
+                        src={img.url}
+                        alt={img.title}
+                        className={`w-full object-cover transition-all duration-300 ${
+                          isExpanded ? 'max-h-64' : 'max-h-40'
+                        }`}
+                        style={{ objectPosition: 'center' }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-space-950/90 via-space-950/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+                      {/* Title bar always-visible */}
+                      <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                        <p className="text-white font-bold text-xs font-mono leading-tight drop-shadow">
+                          {img.title}
+                        </p>
+                        <p className="text-isro-gold text-[9px] font-mono mt-0.5 opacity-90">
+                          {img.instrument}
+                        </p>
+                      </div>
+                      {/* Expand hint */}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[9px] font-mono bg-space-900/80 text-isro-cyan px-1.5 py-0.5 rounded border border-isro-cyan/30">
+                          {isExpanded ? 'collapse' : 'expand'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Info panel (expanded) */}
+                    {isExpanded && (
+                      <div className="p-3 bg-space-900/80 border-t border-space-700/50 space-y-2 font-mono text-[11px]">
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+                          <div>
+                            <span className="text-slate-400 text-[9px] uppercase block">Date Captured</span>
+                            <span className="text-white">{new Date(img.date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                          </div>
+                          <div>
+                            <span className="text-slate-400 text-[9px] uppercase block">Credit</span>
+                            <span className="text-isro-cyan">{img.credit}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-slate-400 text-[9px] uppercase block mb-1">About This Image</span>
+                          <p className="text-slate-300 leading-relaxed font-sans text-[11px]">{img.brief}</p>
+                        </div>
+                        <div className="pt-1 border-t border-space-700/40">
+                          <span className="text-slate-400 text-[9px] uppercase block">Instrument</span>
+                          <span className="text-isro-gold font-semibold">{img.instrument}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
       </div>
     </aside>
   );

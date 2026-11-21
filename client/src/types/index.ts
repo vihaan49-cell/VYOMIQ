@@ -57,6 +57,16 @@ export interface SpacecraftSpec {
   orbitalPeriodMin?: number;
 }
 
+export interface SignatureImage {
+  id: string;
+  url: string;         // path relative to /public, e.g. /real_images/ch3_pragyan_moon.webp
+  title: string;
+  instrument: string;
+  date: string;
+  brief: string;       // 1-2 sentence description shown beneath the image
+  credit: string;      // e.g. "ISRO / ISSDC"
+}
+
 export interface Mission {
   id: string;
   name: string;
@@ -86,6 +96,7 @@ export interface Mission {
   pradanPortalUrl?: string;
   publicationsCount: number;
   datasetSizeGb?: number;
+  signatureImages?: SignatureImage[];
 }
 
 export interface ScientificObservation {
