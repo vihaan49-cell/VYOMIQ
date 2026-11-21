@@ -24,7 +24,21 @@ export const SunBody: React.FC<SunBodyProps> = ({
   const coronaRef = useRef<THREE.Mesh>(null);
   const adityaRef = useRef<THREE.Group>(null);
 
-  const sunTexture = useMemo(() => getSunTexture(), []);
+  // Load Authentic SDO Solar Surface Texture with Procedural Fallback
+  const sunTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    try {
+      const tex = loader.load('/textures/sun.jpg', undefined, undefined, () => {
+        // Fallback on load error
+        return getSunTexture();
+      });
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    } catch {
+      return getSunTexture();
+    }
+  }, []);
+
   const adityaMission = useMemo(() => missions.find((m) => m.id === 'aditya-l1'), [missions]);
 
   const isSunSelected = selectedId === 'sun';
@@ -100,22 +114,22 @@ export const SunBody: React.FC<SunBodyProps> = ({
 
       {/* Atmospheric Corona Glow Layers (Warm Gold & Amber Halos) */}
       <mesh ref={coronaRef}>
-        <sphereGeometry args={[7.75, 40, 40]} />
+        <sphereGeometry args={[7.6, 48, 48]} />
         <meshBasicMaterial
           color="#f59e0b"
           transparent
-          opacity={0.38}
+          opacity={0.35}
           blending={THREE.AdditiveBlending}
           side={THREE.BackSide}
         />
       </mesh>
 
       <mesh>
-        <sphereGeometry args={[9.2, 36, 36]} />
+        <sphereGeometry args={[8.8, 36, 36]} />
         <meshBasicMaterial
           color="#ea580c"
           transparent
-          opacity={0.16}
+          opacity={0.18}
           blending={THREE.AdditiveBlending}
           side={THREE.BackSide}
         />
@@ -139,7 +153,7 @@ export const SunBody: React.FC<SunBodyProps> = ({
         </mesh>
       )}
 
-      {/* Radiant Solar Light casting warm white sunlight across solar system */}
+      {/* Radiant Solar Light casting sunlight across cosmos */}
       <pointLight color="#fffdf0" intensity={4.5} distance={350} decay={0.6} />
 
       {/* Lagrange Point 1 (L1) & Aditya-L1 Halo Orbit */}

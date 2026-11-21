@@ -24,8 +24,34 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
   const earthMeshRef = useRef<THREE.Mesh>(null);
   const cloudsMeshRef = useRef<THREE.Mesh>(null);
 
-  const earthTexture = useMemo(() => getEarthTexture(), []);
-  const cloudTexture = useMemo(() => getEarthCloudTexture(), []);
+  // Load NASA Visible Earth Blue Marble, Normal Map, Specular Map, and Clouds
+  const { earthTexture, earthNormalMap, earthSpecularMap, cloudTexture } = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    try {
+      const eTex = loader.load('/textures/earth_atmos_2048.jpg', undefined, undefined, () => getEarthTexture());
+      eTex.colorSpace = THREE.SRGBColorSpace;
+
+      const normTex = loader.load('/textures/earth_normal_2048.jpg');
+      const specTex = loader.load('/textures/earth_specular_2048.jpg');
+
+      const cTex = loader.load('/textures/earth_clouds_1024.png', undefined, undefined, () => getEarthCloudTexture());
+      cTex.colorSpace = THREE.SRGBColorSpace;
+
+      return {
+        earthTexture: eTex,
+        earthNormalMap: normTex,
+        earthSpecularMap: specTex,
+        cloudTexture: cTex,
+      };
+    } catch {
+      return {
+        earthTexture: getEarthTexture(),
+        earthNormalMap: null,
+        earthSpecularMap: null,
+        cloudTexture: getEarthCloudTexture(),
+      };
+    }
+  }, []);
 
   // Filter missions orbiting Earth
   const earthMissions = useMemo(
@@ -60,7 +86,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
     if (earthMeshRef.current) {
       earthMeshRef.current.rotation.y = elapsed * 0.12;
     }
-    // Clouds rotate slightly faster than surface
+    // Clouds rotate slightly faster than surface for authentic atmospheric dynamics
     if (cloudsMeshRef.current) {
       cloudsMeshRef.current.rotation.y = elapsed * 0.14;
     }
@@ -70,21 +96,18 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
       const group = satRefs.current[m.id];
       if (group) {
         const orbitalPeriod = m.specs.orbitalPeriodMin || 95;
-        // Keplerian angular velocity: speed proportional to period
         const speed = (180 / orbitalPeriod) * 0.45;
         const theta = elapsed * speed + (idx * Math.PI) / 3;
 
         const r = getMissionRadius(m.id);
         const incRad = ((m.orbitInclination || 0) * Math.PI) / 180;
 
-        // Coordinates strictly tracking OrbitPath [incRad, 0, 0] rotation
         const x = r * Math.cos(theta);
         const y = -r * Math.sin(theta) * Math.sin(incRad);
         const z = r * Math.sin(theta) * Math.cos(incRad);
 
         group.position.set(x, y, z);
 
-        // Velocity tangent vector for forward pointing
         const vx = -r * Math.sin(theta);
         const vy = -r * Math.cos(theta) * Math.sin(incRad);
         const vz = r * Math.cos(theta) * Math.cos(incRad);
@@ -97,7 +120,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
     <group position={position}>
       {/* Earth Center Sphere with 23.5° Axial Tilt */}
       <group rotation={[0.41, 0, 0]}>
-        {/* Surface Mesh */}
+        {/* Photorealistic Surface Mesh */}
         <mesh
           ref={earthMeshRef}
           onClick={(e) => {
@@ -108,30 +131,33 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
           <sphereGeometry args={[2.2, 64, 64]} />
           <meshStandardMaterial
             map={earthTexture}
-            roughness={0.5}
-            metalness={0.05}
+            normalMap={earthNormalMap || undefined}
+            normalScale={new THREE.Vector2(0.85, 0.85)}
+            roughnessMap={earthSpecularMap || undefined}
+            roughness={0.65}
+            metalness={0.08}
           />
         </mesh>
 
         {/* Rotating Atmospheric Clouds Layer */}
         <mesh ref={cloudsMeshRef}>
-          <sphereGeometry args={[2.235, 48, 48]} />
+          <sphereGeometry args={[2.235, 64, 64]} />
           <meshStandardMaterial
             map={cloudTexture}
             transparent
-            opacity={0.55}
-            blending={THREE.AdditiveBlending}
+            opacity={0.8}
+            blending={THREE.NormalBlending}
             depthWrite={false}
           />
         </mesh>
 
         {/* Luminous Atmospheric Rayleigh Scattering Rim (Sky-blue glow) */}
         <mesh>
-          <sphereGeometry args={[2.36, 40, 40]} />
+          <sphereGeometry args={[2.34, 48, 48]} />
           <meshBasicMaterial
             color="#38bdf8"
             transparent
-            opacity={0.25}
+            opacity={0.32}
             side={THREE.BackSide}
             blending={THREE.AdditiveBlending}
           />

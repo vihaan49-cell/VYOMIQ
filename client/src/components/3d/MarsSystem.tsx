@@ -24,7 +24,18 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
   const marsMeshRef = useRef<THREE.Mesh>(null);
   const momRef = useRef<THREE.Group>(null);
 
-  const marsTexture = useMemo(() => getMarsTexture(), []);
+  // Load Authentic NASA Mars Viking/MRO Global Surface Texture
+  const marsTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    try {
+      const tex = loader.load('/textures/mars.jpg', undefined, undefined, () => getMarsTexture());
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    } catch {
+      return getMarsTexture();
+    }
+  }, []);
+
   const momMission = useMemo(() => missions.find((m) => m.id === 'mangalyaan-1'), [missions]);
 
   const isMarsSelected = selectedId === 'mars';
@@ -46,19 +57,16 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
 
     // Mangalyaan Keplerian Elliptical Orbit Animation strictly on OrbitPath geometry
     if (momRef.current) {
-      // Kepler's speed variation: faster at periapsis, slower at apoapsis
       const meanAnomaly = elapsed * 0.32;
       const e = 0.55; // Eccentricity
       const E = meanAnomaly + e * Math.sin(meanAnomaly);
 
-      // Coordinates strictly matching OrbitPath [incDeg=150]
       const x = a * Math.cos(E);
       const y = -b * Math.sin(E) * Math.sin(incRad);
       const z = b * Math.sin(E) * Math.cos(incRad);
 
       momRef.current.position.set(x, y, z);
 
-      // Tangent velocity vector for forward pointing
       const vx = -a * Math.sin(E);
       const vy = -b * Math.cos(E) * Math.sin(incRad);
       const vz = b * Math.cos(E) * Math.cos(incRad);
@@ -76,21 +84,23 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
           onSelect('mars', 'planet');
         }}
       >
-        <sphereGeometry args={[1.5, 48, 48]} />
+        <sphereGeometry args={[1.5, 64, 64]} />
         <meshStandardMaterial
           map={marsTexture}
-          roughness={0.82}
+          bumpMap={marsTexture}
+          bumpScale={0.06}
+          roughness={0.85}
           metalness={0.06}
         />
       </mesh>
 
       {/* Thin Atmospheric Limb Haze (Pale azure/white scattering) */}
       <mesh>
-        <sphereGeometry args={[1.56, 32, 32]} />
+        <sphereGeometry args={[1.56, 36, 36]} />
         <meshBasicMaterial
           color="#bfdbfe"
           transparent
-          opacity={0.14}
+          opacity={0.16}
           side={THREE.BackSide}
           blending={THREE.AdditiveBlending}
         />
@@ -99,38 +109,41 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
       {/* Mars Selection Ring */}
       {isMarsSelected && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[1.85, 1.95, 48]} />
+          <ringGeometry args={[1.85, 1.95, 36]} />
           <meshBasicMaterial color="#ef4444" side={THREE.DoubleSide} />
         </mesh>
       )}
 
-      {/* Mangalyaan Highly Elliptical Orbit Trajectory */}
-      <OrbitPath
-        radiusX={a}
-        radiusZ={b}
-        inclinationDeg={incDeg}
-        color="#ef4444"
-        opacity={isMomSelected ? 0.95 : 0.45}
-      />
+      {/* Mangalyaan (Mars Orbiter Mission) Authentic Elliptical Orbit */}
+      <group>
+        {/* Orbital Trajectory Line (150° inclination ellipse) */}
+        <OrbitPath
+          radiusX={a}
+          radiusZ={b}
+          inclinationDeg={incDeg}
+          color="#ef4444"
+          opacity={isMomSelected ? 0.95 : 0.4}
+        />
 
-      {/* Mangalyaan (MOM) Spacecraft Model */}
-      {momMission && (
-        <group
-          ref={momRef}
-          onClick={(e) => {
-            e.stopPropagation();
-            onSelect('mangalyaan-1', 'spacecraft');
-          }}
-        >
-          <SpacecraftModel
-            id="mangalyaan-1"
-            specs={momMission.specs}
-            color={momMission.color}
-            isSelected={isMomSelected}
-            scale={0.28}
-          />
-        </group>
-      )}
+        {/* Mangalyaan Spacecraft */}
+        {momMission && (
+          <group
+            ref={momRef}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect('mangalyaan-1', 'spacecraft');
+            }}
+          >
+            <SpacecraftModel
+              id="mangalyaan-1"
+              specs={momMission.specs}
+              color={momMission.color}
+              isSelected={isMomSelected}
+              scale={0.36}
+            />
+          </group>
+        )}
+      </group>
     </group>
   );
 };

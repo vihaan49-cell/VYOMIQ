@@ -1,5 +1,6 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, Suspense } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { getSolarPanelTexture } from '../../utils/textureGenerator';
 import { SpacecraftSpec } from '../../types';
@@ -15,6 +16,58 @@ interface SpacecraftModelProps {
   onPointerOver?: (e: THREE.Event) => void;
   onPointerOut?: (e: THREE.Event) => void;
 }
+
+// Model registry for authentic 3D GLB assets
+const MODEL_MAPPING: Record<string, { path: string; targetSize: number }> = {
+  'chandrayaan-3': { path: '/models/lander.glb', targetSize: 1.4 },
+  'aditya-l1': { path: '/models/deepspace_probe.glb', targetSize: 1.5 },
+  'mangalyaan-1': { path: '/models/deepspace_probe.glb', targetSize: 1.5 },
+  'astrosat': { path: '/models/satellite.glb', targetSize: 1.3 },
+  'xposat': { path: '/models/satellite.glb', targetSize: 1.3 },
+  'cartosat-3': { path: '/models/earth_satellite.glb', targetSize: 1.3 },
+  'oceansat-3': { path: '/models/earth_satellite.glb', targetSize: 1.3 },
+  'risat-2b': { path: '/models/earth_satellite.glb', targetSize: 1.3 },
+  'insat-3dr': { path: '/models/earth_satellite.glb', targetSize: 1.3 },
+  'navic-constellation': { path: '/models/earth_satellite.glb', targetSize: 1.3 },
+  'chandrayaan-1': { path: '/models/earth_satellite.glb', targetSize: 1.2 },
+  'chandrayaan-2': { path: '/models/earth_satellite.glb', targetSize: 1.2 },
+  'chandrayaan-4': { path: '/models/lander.glb', targetSize: 1.3 },
+  'gaganyaan': { path: '/models/cubesat.glb', targetSize: 1.2 },
+  'vyommitra': { path: '/models/cubesat.glb', targetSize: 1.2 },
+};
+
+// Pre-cache all models
+try {
+  useGLTF.preload('/models/lander.glb');
+  useGLTF.preload('/models/deepspace_probe.glb');
+  useGLTF.preload('/models/satellite.glb');
+  useGLTF.preload('/models/earth_satellite.glb');
+  useGLTF.preload('/models/cubesat.glb');
+} catch {
+  // Preload is non-blocking
+}
+
+// GLTF Loader Component with auto-centering and scale normalization
+const RealisticGLTFModel: React.FC<{ path: string; targetSize: number }> = ({ path, targetSize }) => {
+  const { scene } = useGLTF(path);
+  const cloned = useMemo(() => {
+    const c = scene.clone(true);
+    // Compute exact bounding box and center pivot
+    const box = new THREE.Box3().setFromObject(c);
+    const center = new THREE.Vector3();
+    const size = new THREE.Vector3();
+    box.getCenter(center);
+    box.getSize(size);
+    c.position.sub(center);
+    const maxDim = Math.max(size.x, size.y, size.z);
+    if (maxDim > 0) {
+      c.scale.setScalar(targetSize / maxDim);
+    }
+    return c;
+  }, [scene, targetSize]);
+
+  return <primitive object={cloned} />;
+};
 
 export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   id,
@@ -96,284 +149,68 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
     }
   });
 
-  // Render specific geometries based on spacecraft type
-  const renderCraftGeometry = () => {
+  // Fallback procedural geometry
+  const renderFallbackGeometry = () => {
     switch (id) {
-      // 1. CHANDRAYAAN-3 (Vikram Lander + Pragyan Rover)
       case 'chandrayaan-3':
         return (
           <group>
-            {/* Main Lander Body (Octagonal / Box with Gold MLI) */}
             <mesh material={goldMliMaterial} position={[0, 0.4, 0]}>
               <boxGeometry args={[0.9, 0.6, 0.9]} />
             </mesh>
-
-            {/* Top Deck Equipment */}
             <mesh material={silverMetalMaterial} position={[0, 0.75, 0]}>
               <boxGeometry args={[0.7, 0.1, 0.7]} />
             </mesh>
-
-            {/* Deployable Side Solar Panels */}
             <mesh material={solarPanelMaterial} position={[0.55, 0.4, 0]} rotation={[0, 0, Math.PI / 4]}>
               <boxGeometry args={[0.02, 0.7, 0.8]} />
             </mesh>
             <mesh material={solarPanelMaterial} position={[-0.55, 0.4, 0]} rotation={[0, 0, -Math.PI / 4]}>
               <boxGeometry args={[0.02, 0.7, 0.8]} />
             </mesh>
-
-            {/* 4 Lander Shock-Absorbing Legs */}
-            {[-0.5, 0.5].map((x) =>
-              [-0.5, 0.5].map((z) => (
-                <group key={`${x}-${z}`} position={[x, 0.1, z]}>
-                  {/* Leg Strut */}
-                  <mesh
-                    material={silverMetalMaterial}
-                    rotation={[z * 0.5, 0, -x * 0.5]}
-                    position={[x * 0.3, -0.2, z * 0.3]}
-                  >
-                    <cylinderGeometry args={[0.02, 0.02, 0.6, 8]} />
-                  </mesh>
-                  {/* Footpad */}
-                  <mesh material={goldMliMaterial} position={[x * 0.45, -0.45, z * 0.45]}>
-                    <cylinderGeometry args={[0.1, 0.1, 0.03, 12]} />
-                  </mesh>
-                </group>
-              ))
-            )}
-
-            {/* 4 Throttlable 800N Thruster Nozzles at base */}
-            <mesh material={carbonMaterial} position={[0, 0.05, 0]}>
-              <cylinderGeometry args={[0.12, 0.22, 0.2, 12]} />
-            </mesh>
-
-            {/* ChaSTE Probe deployment arm */}
-            <mesh material={silverMetalMaterial} position={[0.48, 0.25, 0.3]}>
-              <boxGeometry args={[0.1, 0.05, 0.05]} />
-            </mesh>
-
-            {/* Mini Pragyan Rover next to lander */}
-            <group position={[1.2, -0.3, 0.4]}>
-              {/* Rover body */}
-              <mesh material={goldMliMaterial}>
-                <boxGeometry args={[0.3, 0.15, 0.25]} />
-              </mesh>
-              {/* Rover solar panel tilted */}
-              <mesh
-                material={solarPanelMaterial}
-                position={[0, 0.12, 0]}
-                rotation={[0.3, 0, 0]}
-              >
-                <boxGeometry args={[0.35, 0.01, 0.28]} />
-              </mesh>
-              {/* 6 Wheels */}
-              {[-0.15, 0, 0.15].map((rx, idx) => (
-                <React.Fragment key={idx}>
-                  <mesh
-                    material={carbonMaterial}
-                    position={[rx, -0.1, 0.15]}
-                    rotation={[Math.PI / 2, 0, 0]}
-                  >
-                    <cylinderGeometry args={[0.04, 0.04, 0.03, 12]} />
-                  </mesh>
-                  <mesh
-                    material={carbonMaterial}
-                    position={[rx, -0.1, -0.15]}
-                    rotation={[Math.PI / 2, 0, 0]}
-                  >
-                    <cylinderGeometry args={[0.04, 0.04, 0.03, 12]} />
-                  </mesh>
-                </React.Fragment>
-              ))}
-            </group>
           </group>
         );
 
-      // 2. ADITYA-L1 (Solar Observatory)
       case 'aditya-l1':
         return (
           <group>
-            {/* Main Cubical Bus */}
             <mesh material={goldMliMaterial} position={[0, 0, 0]}>
               <boxGeometry args={[0.8, 0.9, 0.8]} />
             </mesh>
-
-            {/* VELC Solar Coronagraph Telescope Aperture pointing Sun-ward (+Z) */}
             <mesh material={silverMetalMaterial} position={[0, 0, 0.55]} rotation={[Math.PI / 2, 0, 0]}>
               <cylinderGeometry args={[0.22, 0.26, 0.4, 16]} />
             </mesh>
-            <mesh material={opticMaterial} position={[0, 0, 0.76]}>
-              <circleGeometry args={[0.18, 16]} />
-            </mesh>
-
-            {/* SUIT UV Telescope Baffle */}
-            <mesh material={carbonMaterial} position={[0.25, 0.25, 0.5]}>
-              <boxGeometry args={[0.2, 0.2, 0.3]} />
-            </mesh>
-
-            {/* Dual Deployable Solar Wings */}
             <mesh material={solarPanelMaterial} position={[1.4, 0, 0]}>
               <boxGeometry args={[1.8, 0.7, 0.02]} />
             </mesh>
             <mesh material={solarPanelMaterial} position={[-1.4, 0, 0]}>
               <boxGeometry args={[1.8, 0.7, 0.02]} />
             </mesh>
-
-            {/* 6-Meter Magnetometer Boom */}
-            <mesh material={silverMetalMaterial} position={[0, -0.9, -0.2]} rotation={[0, 0, 0]}>
-              <cylinderGeometry args={[0.015, 0.015, 1.4, 8]} />
-            </mesh>
-            {/* Fluxgate sensor pods */}
-            <mesh material={goldMliMaterial} position={[0, -1.6, -0.2]}>
-              <sphereGeometry args={[0.06, 12, 12]} />
-            </mesh>
           </group>
         );
 
-      // 3. MANGALYAAN (Mars Orbiter Mission)
       case 'mangalyaan-1':
         return (
           <group>
-            {/* Main Cube Body with Gold MLI */}
             <mesh material={goldMliMaterial}>
               <boxGeometry args={[0.7, 0.7, 0.7]} />
             </mesh>
-
-            {/* 2.2-Meter High Gain Parabolic Dish Antenna */}
             <group position={[0, 0.45, 0]} rotation={[0.4, 0.2, 0]}>
-              {/* Parabolic dish */}
               <mesh material={silverMetalMaterial}>
                 <sphereGeometry args={[0.55, 24, 12, 0, Math.PI * 2, 0, Math.PI / 3]} />
               </mesh>
-              {/* Feed horn */}
-              <mesh material={carbonMaterial} position={[0, 0.35, 0]}>
-                <cylinderGeometry args={[0.02, 0.04, 0.2, 8]} />
-              </mesh>
             </group>
-
-            {/* 3-Panel Solar Array Wing */}
             <mesh material={solarPanelMaterial} position={[1.3, 0, 0]}>
               <boxGeometry args={[1.7, 0.65, 0.02]} />
             </mesh>
-
-            {/* 440N LAM Engine Nozzle (-Z) */}
-            <mesh material={carbonMaterial} position={[0, 0, -0.45]} rotation={[Math.PI / 2, 0, 0]}>
-              <cylinderGeometry args={[0.08, 0.18, 0.25, 16]} />
-            </mesh>
-
-            {/* Mars Colour Camera (MCC) Lens */}
-            <mesh material={opticMaterial} position={[-0.2, -0.2, 0.38]}>
-              <cylinderGeometry args={[0.06, 0.06, 0.08, 12]} />
-            </mesh>
           </group>
         );
 
-      // 4. ASTROSAT / XPOSAT (Space Astronomy Telescopes)
-      case 'astrosat':
-      case 'xposat':
-        return (
-          <group>
-            {/* Hexagonal Bus */}
-            <mesh material={goldMliMaterial} position={[0, -0.2, 0]}>
-              <cylinderGeometry args={[0.45, 0.45, 0.6, 6]} />
-            </mesh>
-
-            {/* UVIT Twin Telescope Cylinders (AstroSat) or POLIX Cylinder (XPoSat) */}
-            {id === 'astrosat' ? (
-              <group position={[0, 0.35, 0]}>
-                <mesh material={silverMetalMaterial} position={[0.15, 0, 0]}>
-                  <cylinderGeometry args={[0.14, 0.14, 0.7, 16]} />
-                </mesh>
-                <mesh material={silverMetalMaterial} position={[-0.15, 0, 0]}>
-                  <cylinderGeometry args={[0.14, 0.14, 0.7, 16]} />
-                </mesh>
-                <mesh material={opticMaterial} position={[0.15, 0.36, 0]}>
-                  <circleGeometry args={[0.12, 16]} />
-                </mesh>
-                <mesh material={opticMaterial} position={[-0.15, 0.36, 0]}>
-                  <circleGeometry args={[0.12, 16]} />
-                </mesh>
-              </group>
-            ) : (
-              <group position={[0, 0.3, 0]}>
-                {/* POLIX Collimator Barrel */}
-                <mesh material={carbonMaterial}>
-                  <cylinderGeometry args={[0.25, 0.28, 0.6, 16]} />
-                </mesh>
-                {/* Beryllium scatterer / detector ring */}
-                <mesh material={opticMaterial} position={[0, 0.31, 0]}>
-                  <circleGeometry args={[0.22, 16]} />
-                </mesh>
-              </group>
-            )}
-
-            {/* Solar Arrays */}
-            <mesh material={solarPanelMaterial} position={[1.1, -0.2, 0]}>
-              <boxGeometry args={[1.2, 0.5, 0.02]} />
-            </mesh>
-            <mesh material={solarPanelMaterial} position={[-1.1, -0.2, 0]}>
-              <boxGeometry args={[1.2, 0.5, 0.02]} />
-            </mesh>
-          </group>
-        );
-
-      // 5. GAGANYAAN (Crew & Service Module)
-      case 'gaganyaan':
-      case 'vyommitra':
-        return (
-          <group>
-            {/* Conical Crew Module (Capsule) */}
-            <mesh material={silverMetalMaterial} position={[0, 0.45, 0]}>
-              <cylinderGeometry args={[0.18, 0.55, 0.65, 24]} />
-            </mesh>
-            {/* Heat Shield base */}
-            <mesh material={carbonMaterial} position={[0, 0.11, 0]}>
-              <cylinderGeometry args={[0.56, 0.56, 0.06, 24]} />
-            </mesh>
-            {/* Windows / Hatches */}
-            <mesh material={opticMaterial} position={[0, 0.48, 0.35]} rotation={[0.4, 0, 0]}>
-              <circleGeometry args={[0.07, 12]} />
-            </mesh>
-
-            {/* Cylindrical Service Module */}
-            <mesh material={goldMliMaterial} position={[0, -0.3, 0]}>
-              <cylinderGeometry args={[0.54, 0.54, 0.7, 24]} />
-            </mesh>
-
-            {/* Solar Wings */}
-            <mesh material={solarPanelMaterial} position={[1.3, -0.3, 0]}>
-              <boxGeometry args={[1.4, 0.6, 0.02]} />
-            </mesh>
-            <mesh material={solarPanelMaterial} position={[-1.3, -0.3, 0]}>
-              <boxGeometry args={[1.4, 0.6, 0.02]} />
-            </mesh>
-          </group>
-        );
-
-      // 6. DEFAULT / EARTH OBSERVATION SATELLITE (Cartosat, Oceansat, RISAT, INSAT)
       default:
         return (
           <group>
-            {/* Satellite Body */}
             <mesh material={goldMliMaterial}>
               <boxGeometry args={[0.65, 0.75, 0.65]} />
             </mesh>
-
-            {/* Optical Camera Cylinder / SAR Reflector */}
-            {id.includes('risat') ? (
-              // Radial Rib Parabolic Mesh Antenna for Radar
-              <group position={[0, 0.5, 0]} rotation={[0.5, 0, 0]}>
-                <mesh material={goldMliMaterial}>
-                  <sphereGeometry args={[0.7, 16, 8, 0, Math.PI * 2, 0, Math.PI / 4]} />
-                </mesh>
-              </group>
-            ) : (
-              // Optical Telescope Barrel
-              <mesh material={carbonMaterial} position={[0, 0, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
-                <cylinderGeometry args={[0.18, 0.2, 0.35, 16]} />
-              </mesh>
-            )}
-
-            {/* Solar Arrays */}
             <mesh material={solarPanelMaterial} position={[1.2, 0, 0]}>
               <boxGeometry args={[1.5, 0.6, 0.02]} />
             </mesh>
@@ -385,6 +222,8 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
     }
   };
 
+  const modelInfo = MODEL_MAPPING[id] || { path: '/models/earth_satellite.glb', targetSize: 1.2 };
+
   return (
     <group
       ref={groupRef}
@@ -393,8 +232,10 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
       onPointerOver={onPointerOver}
       onPointerOut={onPointerOut}
     >
-      {/* Spacecraft Geometry */}
-      {renderCraftGeometry()}
+      {/* Authentic Realistic 3D Model with Graceful Fallback */}
+      <Suspense fallback={renderFallbackGeometry()}>
+        <RealisticGLTFModel path={modelInfo.path} targetSize={modelInfo.targetSize} />
+      </Suspense>
 
       {/* Flashing Telemetry Beacon Light */}
       <mesh ref={beaconRef} position={[0, 0.85, 0]}>

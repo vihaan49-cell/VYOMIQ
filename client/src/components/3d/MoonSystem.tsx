@@ -24,7 +24,17 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
   const moonGroupRef = useRef<THREE.Group>(null);
   const moonMeshRef = useRef<THREE.Mesh>(null);
 
-  const moonTexture = useMemo(() => getMoonTexture(), []);
+  // Load Authentic NASA LRO Lunar Basaltic Maria & Crater Texture
+  const moonTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    try {
+      const tex = loader.load('/textures/moon.jpg', undefined, undefined, () => getMoonTexture());
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    } catch {
+      return getMoonTexture();
+    }
+  }, []);
 
   // Filter lunar missions
   const lunarMissions = useMemo(
@@ -71,15 +81,12 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
         const theta = elapsed * speed + (idx * Math.PI) / 2;
         const r = getLunarOrbitRadius(m.id);
 
-        // Coordinates strictly tracking OrbitPath [inc=90°]
-        // x = r * cos(theta), y = -r * sin(theta), z = 0
         const x = r * Math.cos(theta);
         const y = -r * Math.sin(theta);
         const z = 0;
 
         group.position.set(x, y, z);
 
-        // Point spacecraft along orbital velocity tangent
         const vx = -r * Math.sin(theta);
         const vy = -r * Math.cos(theta);
         group.lookAt(x + vx, y + vy, z);
@@ -95,7 +102,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
 
   return (
     <group ref={moonGroupRef} position={[earthPosition[0] + 9.5, 0, 0]}>
-      {/* Moon Center Sphere with high-contrast authentic albedo */}
+      {/* Moon Center Sphere with high-contrast authentic LRO surface */}
       <mesh
         ref={moonMeshRef}
         onClick={(e) => {
@@ -103,10 +110,12 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
           onSelect('moon', 'planet');
         }}
       >
-        <sphereGeometry args={[0.9, 48, 48]} />
+        <sphereGeometry args={[0.9, 64, 64]} />
         <meshStandardMaterial
           map={moonTexture}
-          roughness={0.78}
+          bumpMap={moonTexture}
+          bumpScale={0.05}
+          roughness={0.88}
           metalness={0.04}
         />
       </mesh>

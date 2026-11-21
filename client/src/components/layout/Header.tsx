@@ -13,6 +13,7 @@ import {
   Info,
   Maximize2,
   RotateCcw,
+  Github,
 } from 'lucide-react';
 import { spaceAudio } from '../../utils/audio';
 
@@ -89,7 +90,8 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center space-x-2.5 cursor-pointer group"
           onClick={() => {
             spaceAudio.playClick();
-            onNavigate('home');
+            onNavigate('universe');
+            onCameraPreset('all');
           }}
         >
           {/* Animated Chakra / ISRO Orange Emblem */}
@@ -310,6 +312,17 @@ export const Header: React.FC<HeaderProps> = ({
         >
           <Maximize2 className="w-3.5 h-3.5" />
         </button>
+
+        {/* Developer GitHub Profile Link */}
+        <a
+          href="https://github.com/ishant25bce11024"
+          target="_blank"
+          rel="noreferrer"
+          className="p-1.5 rounded-md bg-space-850 hover:bg-space-700/70 border border-space-600/50 text-slate-300 hover:text-white transition-colors flex items-center justify-center group"
+          title="Developer GitHub: ishant25bce11024"
+        >
+          <Github className="w-3.5 h-3.5 group-hover:text-isro-cyan transition-colors" />
+        </a>
       </div>
     </header>
   );
