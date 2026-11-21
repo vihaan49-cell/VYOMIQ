@@ -109,3 +109,38 @@ body {
 .animate-radar {
   animation: radar-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float-gentle 5s ease-in-out infinite;
+}
+
+@keyframes orbit-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-orbit {
+  animation: orbit-slow 40s linear infinite;
+}
+
+/* Glass card hover with smooth backdrop blur and border glow */
+.glass-interactive-card {
+  background: rgba(10, 18, 38, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 88, 167, 0.25);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-interactive-card:hover {
+  background: rgba(14, 26, 54, 0.85);
+  border-color: rgba(6, 182, 212, 0.55);
+  box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.3), 0 0 20px -5px rgba(249, 115, 22, 0.2);
+  transform: translateY(-4px);
+}
+

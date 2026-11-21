@@ -13,13 +13,14 @@ import { AboutView } from './components/views/AboutView';
 import { ObservationModal } from './components/modals/ObservationModal';
 import { UniversalSearchModal } from './components/modals/UniversalSearchModal';
 import { MilestoneModal } from './components/modals/MilestoneModal';
+import { HomeView } from './components/views/HomeView';
 import { ScientificObservation, MissionMilestone } from './types';
 import { spaceAudio } from './utils/audio';
 
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<
-    'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about'
-  >('universe');
+    'home' | 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about'
+  >('home');
 
   const [selectedId, setSelectedId] = useState<string | null>('chandrayaan-3');
   const [selectedType, setSelectedType] = useState<'planet' | 'spacecraft' | 'all' | null>(
@@ -95,6 +96,19 @@ export const App: React.FC = () => {
     }
   };
 
+  // Launch into 3D universe from home view
+  const handleEnterUniverseFromHome = (preset?: 'all' | 'sun' | 'earth' | 'moon' | 'mars', spacecraftId?: string) => {
+    setCurrentView('universe');
+    setIsLeftPanelOpen(true);
+    if (spacecraftId) {
+      handleSelect(spacecraftId, 'spacecraft');
+    } else if (preset) {
+      handleCameraPreset(preset);
+    } else {
+      handleCameraPreset('all');
+    }
+  };
+
   // Currently active mission object (for Right Panel)
   const activeMission = MISSIONS_DATA.find((m) => m.id === selectedId) || null;
 
@@ -154,6 +168,21 @@ export const App: React.FC = () => {
             selectedMission={activeMission}
             allMissions={MISSIONS_DATA}
             onSelectMilestone={(ms) => setModalMilestone(ms)}
+          />
+        )}
+
+        {/* SUB-VIEW 0: IMMERSIVE HOME LANDING VIEW */}
+        {currentView === 'home' && (
+          <HomeView
+            missions={MISSIONS_DATA}
+            onEnterUniverse={handleEnterUniverseFromHome}
+            onNavigate={(view) => {
+              setCurrentView(view);
+              if (view === 'universe') {
+                setIsLeftPanelOpen(true);
+              }
+            }}
+            onOpenSearch={() => setIsSearchOpen(true)}
           />
         )}
 

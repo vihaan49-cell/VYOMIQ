@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
+  Sparkles,
   Compass,
   Search,
   Volume2,
@@ -16,8 +17,8 @@ import {
 import { spaceAudio } from '../../utils/audio';
 
 interface HeaderProps {
-  currentView: 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about';
-  onNavigate: (view: 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about') => void;
+  currentView: 'home' | 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about';
+  onNavigate: (view: 'home' | 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about') => void;
   onOpenSearch: () => void;
   timeScale: number;
   setTimeScale: (scale: number) => void;
@@ -88,8 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
           className="flex items-center space-x-2.5 cursor-pointer group"
           onClick={() => {
             spaceAudio.playClick();
-            onNavigate('universe');
-            onCameraPreset('all');
+            onNavigate('home');
           }}
         >
           {/* Animated Chakra / ISRO Orange Emblem */}
@@ -135,6 +135,21 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Center: Main Section Navigation Tabs */}
       <nav className="hidden md:flex items-center space-x-1 bg-space-900/80 p-1 rounded-lg border border-space-700/50">
+        <button
+          onClick={() => {
+            spaceAudio.playClick();
+            onNavigate('home');
+          }}
+          className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            currentView === 'home'
+              ? 'bg-gradient-to-r from-isro-amber/20 to-isro-cyan/20 text-white border border-isro-amber/40 shadow-glow-orange'
+              : 'text-slate-400 hover:text-white hover:bg-space-800/60'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5 text-isro-amber" />
+          <span>Home</span>
+        </button>
+
         <button
           onClick={() => {
             spaceAudio.playClick();
