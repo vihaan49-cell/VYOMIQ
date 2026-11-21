@@ -107,6 +107,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
           const step = Math.min(delta * 4.0, 0.2);
           camera.position.lerp(targetPos.current, step);
           controlsRef.current.target.lerp(targetLook.current, step);
+          controlsRef.current.update();
 
           if (
             camera.position.distanceTo(targetPos.current) < 0.25 &&
@@ -114,6 +115,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
           ) {
             camera.position.copy(targetPos.current);
             controlsRef.current.target.copy(targetLook.current);
+            controlsRef.current.update();
             isTransitioning.current = false;
           }
         } else {
@@ -123,6 +125,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
             if (deltaMove.length() < 6) {
               controlsRef.current.target.add(deltaMove);
               camera.position.add(deltaMove);
+              controlsRef.current.update();
             }
           }
         }

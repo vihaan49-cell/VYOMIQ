@@ -160,6 +160,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
         {/* Surface Vikram Lander & Pragyan Rover 3D Model */}
         {ch3 && (
           <group
+            name="chandrayaan-3"
             position={[0.04, 0.02, 0]}
             scale={0.11}
             onClick={(e) => {
