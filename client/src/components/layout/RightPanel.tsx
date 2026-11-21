@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Mission, ScientificInstrument, ScientificObservation } from '../../types';
 import { spaceAudio } from '../../utils/audio';
+import { SpacecraftViewer3D } from '../3d/SpacecraftViewer3D';
 
 interface RightPanelProps {
   mission: Mission | null;
@@ -93,6 +94,11 @@ export const RightPanel: React.FC<RightPanelProps> = ({
         >
           <X className="w-4 h-4" />
         </button>
+      </div>
+
+      {/* Interactive 3D Model Inspector (360° Drag & Zoom) */}
+      <div className="p-3 bg-space-950/70 border-b border-space-700/60">
+        <SpacecraftViewer3D mission={mission} height="h-44" />
       </div>
 
       {/* Navigation Sub-Tabs */}

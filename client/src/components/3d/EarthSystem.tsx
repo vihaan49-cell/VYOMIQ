@@ -201,7 +201,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
                 specs={m.specs}
                 color={m.color}
                 isSelected={isSelected}
-                scale={0.28}
+                scale={0.18}
               />
             </group>
           </React.Fragment>

@@ -139,7 +139,7 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
               specs={momMission.specs}
               color={momMission.color}
               isSelected={isMomSelected}
-              scale={0.36}
+              scale={0.20}
             />
           </group>
         )}

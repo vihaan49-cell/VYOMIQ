@@ -184,7 +184,7 @@ export const SunBody: React.FC<SunBodyProps> = ({
               specs={adityaMission.specs}
               color={adityaMission.color}
               isSelected={isAdityaSelected}
-              scale={0.48}
+              scale={0.24}
             />
           </group>
         )}

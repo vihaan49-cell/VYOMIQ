@@ -470,12 +470,12 @@ export function getSunTexture(): THREE.CanvasTexture {
   return texture;
 }
 
-// 6. SPACECRAFT SOLAR ARRAY TEXTURE
+// 6. SPACECRAFT SOLAR ARRAY TEXTURE (Photorealistic Silicon Photovoltaic Cells)
 export function getSolarPanelTexture(): THREE.CanvasTexture {
   if (textureCache['solar_panel']) return textureCache['solar_panel'];
 
-  const width = 256;
-  const height = 256;
+  const width = 512;
+  const height = 512;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -483,29 +483,68 @@ export function getSolarPanelTexture(): THREE.CanvasTexture {
 
   if (!ctx) return new THREE.CanvasTexture(canvas);
 
-  ctx.fillStyle = '#0f172a';
+  // Deep space-grade silicon cell background
+  ctx.fillStyle = '#060d1f';
   ctx.fillRect(0, 0, width, height);
 
-  ctx.fillStyle = '#1e3a8a';
-  const cellSize = 32;
-  for (let y = 2; y < height; y += cellSize) {
-    for (let x = 2; x < width; x += cellSize) {
-      ctx.fillRect(x, y, cellSize - 4, cellSize - 4);
+  const cols = 8;
+  const rows = 8;
+  const cellW = width / cols;
+  const cellH = height / rows;
+  const pad = 3;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * cellW + pad;
+      const y = r * cellH + pad;
+      const w = cellW - pad * 2;
+      const h = cellH - pad * 2;
+
+      // Photovoltaic cell gradient (anti-reflective coating deep blue with subtle violet sheen)
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, '#102a5c');
+      grad.addColorStop(0.5, '#0b1d42');
+      grad.addColorStop(1, '#071530');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, w, h);
+
+      // Fine silver grid conductors (fingers)
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+      ctx.lineWidth = 1;
+      const fingerCount = 6;
+      for (let f = 1; f < fingerCount; f++) {
+        const fy = y + (h / fingerCount) * f;
+        ctx.beginPath();
+        ctx.moveTo(x + 2, fy);
+        ctx.lineTo(x + w - 2, fy);
+        ctx.stroke();
+      }
+
+      // Silver busbars (thick vertical contact strips)
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x + w * 0.33, y);
+      ctx.lineTo(x + w * 0.33, y + h);
+      ctx.moveTo(x + w * 0.66, y);
+      ctx.lineTo(x + w * 0.66, y + h);
+      ctx.stroke();
     }
   }
 
-  ctx.strokeStyle = '#94a3b8';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < width; x += cellSize) {
+  // Inter-cell panel border grid
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 2;
+  for (let c = 0; c <= cols; c++) {
     ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
+    ctx.moveTo(c * cellW, 0);
+    ctx.lineTo(c * cellW, height);
     ctx.stroke();
   }
-  for (let y = 0; y < height; y += cellSize) {
+  for (let r = 0; r <= rows; r++) {
     ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
+    ctx.moveTo(0, r * cellH);
+    ctx.lineTo(width, r * cellH);
     ctx.stroke();
   }
 
@@ -513,5 +552,59 @@ export function getSolarPanelTexture(): THREE.CanvasTexture {
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   textureCache['solar_panel'] = texture;
+  return texture;
+}
+
+// 7. EMBOSSED GOLD MLI FOIL TEXTURE (ISRO & NASA Kapton Multi-Layer Insulation)
+export function getGoldFoilTexture(): THREE.CanvasTexture {
+  if (textureCache['gold_foil_mli']) return textureCache['gold_foil_mli'];
+
+  const width = 512;
+  const height = 512;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  // Vibrant gold base
+  ctx.fillStyle = '#d97706';
+  ctx.fillRect(0, 0, width, height);
+
+  // Embossed crinkle pattern simulation
+  const tileSize = 32;
+  for (let y = 0; y < height; y += tileSize) {
+    for (let x = 0; x < width; x += tileSize) {
+      // Randomized crinkled facet
+      const shade = pseudoRandom(x, y);
+      const grad = ctx.createLinearGradient(x, y, x + tileSize, y + tileSize);
+      if (shade > 0.6) {
+        grad.addColorStop(0, '#fbbf24');
+        grad.addColorStop(0.5, '#f59e0b');
+        grad.addColorStop(1, '#b45309');
+      } else if (shade > 0.3) {
+        grad.addColorStop(0, '#f59e0b');
+        grad.addColorStop(0.5, '#d97706');
+        grad.addColorStop(1, '#92400e');
+      } else {
+        grad.addColorStop(0, '#d97706');
+        grad.addColorStop(0.5, '#b45309');
+        grad.addColorStop(1, '#78350f');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+
+      // Crinkle crease highlights & seam lines
+      ctx.strokeStyle = shade > 0.5 ? 'rgba(254, 240, 138, 0.45)' : 'rgba(120, 53, 15, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, tileSize, tileSize);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  textureCache['gold_foil_mli'] = texture;
   return texture;
 }

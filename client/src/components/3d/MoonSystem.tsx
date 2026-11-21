@@ -157,7 +157,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
         {ch3 && (
           <group
             position={[0.04, 0.02, 0]}
-            scale={0.15}
+            scale={0.11}
             onClick={(e) => {
               e.stopPropagation();
               onSelect('chandrayaan-3', 'spacecraft');
@@ -203,7 +203,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
                 specs={m.specs}
                 color={m.color}
                 isSelected={isSelected}
-                scale={0.24}
+                scale={0.16}
               />
             </group>
           </React.Fragment>

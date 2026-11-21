@@ -39,10 +39,11 @@ export const UniverseCanvas: React.FC<UniverseCanvasProps> = ({
         <color attach="background" args={['#030712']} />
 
         {/* Photorealistic Lighting: Vibrant ambient light so textures are rich & visible from all angles */}
-        <ambientLight intensity={0.75} color="#ffffff" />
+        <ambientLight intensity={0.85} color="#ffffff" />
         
-        {/* Soft directional fill light */}
-        <directionalLight position={[0, 20, 10]} intensity={0.4} color="#f8fafc" />
+        {/* Soft directional fill light and rim highlights for metallic spacecraft & planets */}
+        <directionalLight position={[20, 25, 20]} intensity={0.9} color="#f8fafc" />
+        <directionalLight position={[-20, -10, -15]} intensity={0.4} color="#7dd3fc" />
 
         <Suspense fallback={null}>
           {/* Deep Space Background Stars */}
