@@ -136,7 +136,45 @@ export const MISSIONS_DATA: Mission[] = [
     issdcPortalUrl: 'https://www.issdc.gov.in',
     pradanPortalUrl: 'https://pradan.issdc.gov.in/ch3/',
     publicationsCount: 38,
-    datasetSizeGb: 420.5
+    datasetSizeGb: 420.5,
+    signatureImages: [
+      {
+        id: 'ch3_sig1',
+        url: '/real_images/ch3_pragyan_moon.webp',
+        title: 'Pragyan Rover on the Lunar Surface',
+        instrument: 'Vikram Lander Ramp Camera (NavCam)',
+        date: '2023-08-24',
+        brief: 'First image of the Pragyan rover captured moments after it rolled off the Vikram Lander ramp onto the ancient regolith of the lunar south polar region at Shiv Shakti Point.',
+        credit: 'ISRO / ISSDC'
+      },
+      {
+        id: 'ch3_sig2',
+        url: '/real_images/ch3_vikram_surface.png',
+        title: 'Vikram Lander on Lunar Surface',
+        instrument: 'Pragyan Rover NavCam',
+        date: '2023-08-30',
+        brief: 'Pragyan rover turned its navigation camera backward to photograph the Vikram Lander standing silently on the Moon — the first image of an Indian lander taken from the surface of another world.',
+        credit: 'ISRO / ISSDC'
+      },
+      {
+        id: 'ch3_sig3',
+        url: '/real_images/ch3_rover_crater.webp',
+        title: 'Pragyan Navigates Around Crater',
+        instrument: 'Vikram Lander NavCam / Rover Telemetry',
+        date: '2023-08-27',
+        brief: 'Ground controllers commanded Pragyan to retrace its path after a 4-metre-wide crater was detected ahead, capturing this iconic image of the rover silhouette against the stark polar landscape.',
+        credit: 'ISRO / ISSDC'
+      },
+      {
+        id: 'ch3_sig4',
+        url: '/real_images/ch3_libs_spectrum.png',
+        title: 'LIBS Elemental Spectrum — Sulfur Detected',
+        instrument: 'LIBS (Laser-Induced Breakdown Spectroscope)',
+        date: '2023-08-28',
+        brief: 'The spectral output from LIBS confirming the in-situ detection of elemental Sulfur (S) on the lunar south polar surface — a world first. The characteristic emission line at 921.3 nm is unmistakable.',
+        credit: 'ISRO / LEOS Bengaluru'
+      }
+    ]
   },
 
   {
@@ -260,7 +298,27 @@ export const MISSIONS_DATA: Mission[] = [
     issdcPortalUrl: 'https://www.issdc.gov.in',
     pradanPortalUrl: 'https://pradan.issdc.gov.in/ch2/',
     publicationsCount: 64,
-    datasetSizeGb: 1250.0
+    datasetSizeGb: 1250.0,
+    signatureImages: [
+      {
+        id: 'ch2_sig1',
+        url: '/real_images/ch2_ohrc_vikram.webp',
+        title: 'Chandrayaan-3 Lander Imaged from Orbit',
+        instrument: 'OHRC (Orbiter High Resolution Camera)',
+        date: '2023-09-01',
+        brief: 'The OHRC camera aboard Chandrayaan-2, orbiting 100 km above the Moon, captured this remarkable image of the Chandrayaan-3 Vikram Lander resting on the lunar south polar surface — 25 cm resolution from space.',
+        credit: 'ISRO / SAC Ahmedabad'
+      },
+      {
+        id: 'ch2_sig2',
+        url: '/real_images/moon_real_photo.jpg',
+        title: 'High-Resolution Lunar Polar Region',
+        instrument: 'TMC-2 (Terrain Mapping Camera-2)',
+        date: '2021-04-10',
+        brief: 'A mosaic of the lunar south polar region composed from multiple TMC-2 stereo passes, revealing the complex interplay of permanently shadowed craters and sunlit ridges that define this scientifically precious terrain.',
+        credit: 'ISRO / SAC Ahmedabad / ISSDC'
+      }
+    ]
   },
 
   {
@@ -348,7 +406,27 @@ export const MISSIONS_DATA: Mission[] = [
     orbitInclination: 90,
     issdcPortalUrl: 'https://www.issdc.gov.in',
     publicationsCount: 110,
-    datasetSizeGb: 315.0
+    datasetSizeGb: 315.0,
+    signatureImages: [
+      {
+        id: 'ch1_sig1',
+        url: '/real_images/ch1_m3_water_map.jpg',
+        title: 'Water Molecule Distribution Map — The Moon',
+        instrument: "M3 — Moon Mineralogy Mapper (NASA/ISRO)",
+        date: '2009-09-24',
+        brief: 'The historic false-color M3 map showing widespread distribution of water molecules (H₂O) and hydroxyl (OH) groups across the sunlit lunar surface, overturning four decades of scientific consensus that the Moon was completely dry.',
+        credit: 'NASA / ISRO / Brown University'
+      },
+      {
+        id: 'ch1_sig2',
+        url: '/real_images/moon_real_photo.jpg',
+        title: 'Lunar Polar Craters — M3 Mapping Survey',
+        instrument: "M3 / TMC Chandrayaan-1",
+        date: '2008-12-15',
+        brief: 'High-resolution imaging of the lunar polar region from Chandrayaan-1 during its 100 km mapping orbit, capturing permanently shadowed craters that harbor the water ice later confirmed by M3 spectroscopy.',
+        credit: 'ISRO / ISSDC'
+      }
+    ]
   },
 
   {
@@ -542,7 +620,18 @@ export const MISSIONS_DATA: Mission[] = [
     orbitEccentricity: 0.88,
     issdcPortalUrl: 'https://www.issdc.gov.in/mom.html',
     publicationsCount: 92,
-    datasetSizeGb: 780.0
+    datasetSizeGb: 780.0,
+    signatureImages: [
+      {
+        id: 'mom_sig1',
+        url: '/real_images/mom_mars_fulldisk.png',
+        title: 'Full Disk of Mars — MOM Global View',
+        instrument: 'MCC (Mars Colour Camera)',
+        date: '2015-09-28',
+        brief: 'One of the most iconic full-disk colour images of Mars ever published, captured by MOM\'s Mars Colour Camera from its unique high-apocentre vantage point at 76,993 km — no other spacecraft provided this synoptic global view in 2014-2022.',
+        credit: 'ISRO / SAC Ahmedabad / ISSDC'
+      }
+    ]
   },
 
   // --- SOLAR EXPLORATION ---
@@ -693,7 +782,27 @@ export const MISSIONS_DATA: Mission[] = [
     orbitInclination: 12.5,
     issdcPortalUrl: 'https://www.issdc.gov.in/aditya-l1.html',
     publicationsCount: 24,
-    datasetSizeGb: 920.0
+    datasetSizeGb: 920.0,
+    signatureImages: [
+      {
+        id: 'adl1_sig1',
+        url: '/real_images/aditya_suit_sun_uv1.png',
+        title: 'First Full-Disk Solar UV Image',
+        instrument: 'SUIT (Solar Ultraviolet Imaging Telescope)',
+        date: '2023-12-06',
+        brief: 'The very first full-disk solar image in the ultraviolet band captured by SUIT — India\'s first space-based UV image of the Sun. The image reveals bright chromospheric plages, active magnetic regions, and dark sunspot umbrae in unprecedented UV detail.',
+        credit: 'IUCAA Pune / ISRO / Aditya-L1 Mission'
+      },
+      {
+        id: 'adl1_sig2',
+        url: '/real_images/aditya_suit_sun_uv2.png',
+        title: 'Solar Active Region in Near-UV',
+        instrument: 'SUIT (Solar Ultraviolet Imaging Telescope)',
+        date: '2024-02-14',
+        brief: 'A zoomed SUIT observation of a complex solar active region (NOAA AR3576) showing coronal bright points, chromospheric fibrils, and a sunspot group — the magnetic architecture responsible for eruptions observed during the May 2024 superstorm.',
+        credit: 'IUCAA Pune / ISRO / Aditya-L1 Mission'
+      }
+    ]
   },
 
   // --- SPACE ASTRONOMY ---
@@ -799,7 +908,18 @@ export const MISSIONS_DATA: Mission[] = [
     orbitInclination: 6,
     issdcPortalUrl: 'https://www.issdc.gov.in/astrosat.html',
     publicationsCount: 310,
-    datasetSizeGb: 2850.0
+    datasetSizeGb: 2850.0,
+    signatureImages: [
+      {
+        id: 'astro_sig1',
+        url: '/real_images/astrosat_crab_nebula.jpg',
+        title: 'Crab Nebula — Multi-Wavelength X-ray Portrait',
+        instrument: 'CZTI / LAXPC (Cadmium Zinc Telluride Imager / LAXPC)',
+        date: '2015-10-06',
+        brief: 'AstroSat\'s first-light image of the iconic Crab Nebula pulsar wind nebula, the remnant of a supernova recorded by Chinese astronomers in 1054 AD. CZTI detected hard X-ray polarization of the pulsar beam — a world-class measurement for Indian astronomy.',
+        credit: 'TIFR Mumbai / ISRO / AstroSat Science Working Group'
+      }
+    ]
   },
 
   {

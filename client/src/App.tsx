@@ -28,7 +28,7 @@ export const App: React.FC = () => {
         return v as any;
       }
     }
-    return 'home';
+    return 'universe';
   });
 
   const [selectedId, setSelectedId] = useState<string | null>('chandrayaan-3');
