@@ -63,6 +63,13 @@ p, span, div, a, button, input, label {
 }
 
 /* Glassmorphism styling - High-performance GPU rendering without compositor flicker */
+.header-solid-black {
+  background-color: #000000 !important;
+  background: #000000 !important;
+  border-bottom: 1px solid #171717 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8) !important;
+}
+
 .glass-panel {
   background: rgba(8, 14, 30, 0.94);
   border: 1px solid rgba(56, 88, 167, 0.35);

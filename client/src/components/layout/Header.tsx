@@ -83,7 +83,14 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-16 w-full glass-panel border-b border-space-600/40 px-4 flex items-center justify-between z-30 select-none">
+    <header
+      style={currentView === 'universe' ? { backgroundColor: '#000000' } : undefined}
+      className={`h-16 w-full px-4 flex items-center justify-between z-30 select-none transition-colors duration-200 ${
+        currentView === 'universe'
+          ? 'header-solid-black bg-black border-b border-neutral-900 shadow-md'
+          : 'glass-panel border-b border-space-600/40'
+      }`}
+    >
       {/* Left: Project Branding & Emblem */}
       <div className="flex items-center space-x-3.5">
         <div
@@ -105,7 +112,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Live Mission Control Telemetry Clocks */}
-        <div className="hidden lg:flex items-center space-x-3 pl-4 border-l border-space-700/60 font-mono text-xs">
+        <div
+          className={`hidden lg:flex items-center space-x-3 pl-4 border-l font-mono text-xs ${
+            currentView === 'universe' ? 'border-neutral-800' : 'border-space-700/60'
+          }`}
+        >
           <div className="flex flex-col">
             <span className="text-[9px] text-slate-400 tracking-wider">IST (BHARAT)</span>
             <span className="text-isro-gold font-semibold">{timeIST || '18:30:00'}</span>
@@ -122,7 +133,13 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center: Main Section Navigation Tabs */}
-      <nav className="hidden md:flex items-center space-x-1 bg-space-900/80 p-1 rounded-lg border border-space-700/50">
+      <nav
+        className={`hidden md:flex items-center space-x-1 p-1 rounded-lg border transition-colors ${
+          currentView === 'universe'
+            ? 'bg-neutral-950/90 border-neutral-800'
+            : 'bg-space-900/80 border-space-700/50'
+        }`}
+      >
         <button
           onClick={() => {
             spaceAudio.playClick();
@@ -222,7 +239,11 @@ export const Header: React.FC<HeaderProps> = ({
             spaceAudio.playClick();
             onOpenSearch();
           }}
-          className="flex items-center space-x-2 px-2.5 py-1.5 rounded-md bg-space-850 hover:bg-space-700/70 border border-space-600/50 text-slate-300 hover:text-white text-xs font-mono transition-all group"
+          className={`flex items-center space-x-2 px-2.5 py-1.5 rounded-md border text-slate-300 hover:text-white text-xs font-mono transition-all group ${
+            currentView === 'universe'
+              ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800'
+              : 'bg-space-850 hover:bg-space-700/70 border-space-600/50'
+          }`}
           title="Universal Search (Ctrl+K)"
         >
           <Search className="w-3.5 h-3.5 text-isro-cyan group-hover:scale-110 transition-transform" />
@@ -234,7 +255,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Quick Camera Presets (when in 3D universe) */}
         {currentView === 'universe' && (
-          <div className="hidden xl:flex items-center space-x-1 bg-space-900/90 px-1.5 py-1 rounded-md border border-space-700/60 font-mono text-[11px]">
+          <div className="hidden xl:flex items-center space-x-1 bg-neutral-950/90 px-1.5 py-1 rounded-md border border-neutral-800 font-mono text-[11px]">
             <span className="text-slate-400 text-[9px] px-1">VIEW:</span>
             {(['all', 'sun', 'earth', 'moon', 'mars'] as const).map((preset) => (
               <button
@@ -246,7 +267,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className={`px-2 py-0.5 rounded uppercase transition-colors ${
                   activePreset === preset
                     ? 'bg-isro-amber text-slate-950 font-bold'
-                    : 'text-slate-300 hover:bg-space-800 hover:text-white'
+                    : 'text-slate-300 hover:bg-neutral-800 hover:text-white'
                 }`}
               >
                 {preset}
@@ -257,7 +278,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Orbit Speed Multiplier / Time Scrubber */}
         {currentView === 'universe' && (
-          <div className="flex items-center space-x-1 bg-space-900/90 px-2 py-1 rounded-md border border-space-700/60 font-mono text-xs">
+          <div className="flex items-center space-x-1 bg-neutral-950/90 px-2 py-1 rounded-md border border-neutral-800 font-mono text-xs">
             <button
               onClick={() => {
                 spaceAudio.playClick();
@@ -284,7 +305,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Sound Toggle */}
         <button
           onClick={handleSoundToggle}
-          className="p-1.5 rounded-md bg-space-850 hover:bg-space-700/70 border border-space-600/50 text-slate-300 hover:text-white transition-colors"
+          className={`p-1.5 rounded-md border text-slate-300 hover:text-white transition-colors ${
+            currentView === 'universe'
+              ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800'
+              : 'bg-space-850 hover:bg-space-700/70 border-space-600/50'
+          }`}
           title={isMuted ? 'Unmute Space Audio' : 'Mute Space Audio'}
         >
           {isMuted ? <VolumeX className="w-3.5 h-3.5 text-slate-400" /> : <Volume2 className="w-3.5 h-3.5 text-isro-cyan" />}
@@ -293,7 +318,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Fullscreen */}
         <button
           onClick={handleFullscreenToggle}
-          className="p-1.5 rounded-md bg-space-850 hover:bg-space-700/70 border border-space-600/50 text-slate-300 hover:text-white transition-colors hidden sm:block"
+          className={`p-1.5 rounded-md border text-slate-300 hover:text-white transition-colors hidden sm:block ${
+            currentView === 'universe'
+              ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800'
+              : 'bg-space-850 hover:bg-space-700/70 border-space-600/50'
+          }`}
           title="Toggle Fullscreen"
         >
           <Maximize2 className="w-3.5 h-3.5" />
@@ -304,7 +333,11 @@ export const Header: React.FC<HeaderProps> = ({
           href="https://github.com/ishant25bce11024"
           target="_blank"
           rel="noreferrer"
-          className="p-1.5 rounded-md bg-space-850 hover:bg-space-700/70 border border-space-600/50 text-slate-300 hover:text-white transition-colors flex items-center justify-center group"
+          className={`p-1.5 rounded-md border text-slate-300 hover:text-white transition-colors flex items-center justify-center group ${
+            currentView === 'universe'
+              ? 'bg-neutral-900 hover:bg-neutral-800 border-neutral-800'
+              : 'bg-space-850 hover:bg-space-700/70 border-space-600/50'
+          }`}
           title="Developer GitHub: ishant25bce11024"
         >
           <Github className="w-3.5 h-3.5 group-hover:text-isro-cyan transition-colors" />
