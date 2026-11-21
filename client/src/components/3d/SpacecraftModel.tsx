@@ -40,11 +40,11 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
     () =>
       new THREE.MeshStandardMaterial({
         map: goldFoilTexture,
-        color: '#f59e0b',
-        metalness: 0.92,
-        roughness: 0.22,
-        bumpMap: goldFoilTexture,
-        bumpScale: 0.04,
+        color: '#ffffff',
+        metalness: 0.5,
+        roughness: 0.3,
+        emissive: '#b45309',
+        emissiveIntensity: 0.18,
       }),
     [goldFoilTexture]
   );
@@ -53,9 +53,11 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   const silverMetalMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#f1f5f9',
-        metalness: 0.94,
-        roughness: 0.16,
+        color: '#f8fafc',
+        metalness: 0.6,
+        roughness: 0.25,
+        emissive: '#475569',
+        emissiveIntensity: 0.1,
       }),
     []
   );
@@ -65,8 +67,11 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
     () =>
       new THREE.MeshStandardMaterial({
         map: solarTexture,
-        roughness: 0.15,
-        metalness: 0.88,
+        color: '#ffffff',
+        roughness: 0.2,
+        metalness: 0.5,
+        emissive: '#0369a1',
+        emissiveIntensity: 0.12,
       }),
     [solarTexture]
   );
@@ -75,9 +80,9 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   const carbonMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#0f172a',
-        roughness: 0.55,
-        metalness: 0.4,
+        color: '#334155',
+        roughness: 0.6,
+        metalness: 0.25,
       }),
     []
   );
@@ -86,11 +91,11 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   const opticMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#0284c7',
+        color: '#38bdf8',
         roughness: 0.05,
-        metalness: 0.95,
-        emissive: '#0369a1',
-        emissiveIntensity: 0.35,
+        metalness: 0.9,
+        emissive: '#0284c7',
+        emissiveIntensity: 0.45,
       }),
     []
   );
@@ -99,9 +104,11 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   const dishMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#e2e8f0',
-        metalness: 0.95,
-        roughness: 0.18,
+        color: '#f1f5f9',
+        metalness: 0.6,
+        roughness: 0.22,
+        emissive: '#64748b',
+        emissiveIntensity: 0.1,
         side: THREE.DoubleSide,
       }),
     []
