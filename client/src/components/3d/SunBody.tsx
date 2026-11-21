@@ -11,6 +11,7 @@ interface SunBodyProps {
   selectedId: string | null;
   onSelect: (id: string, type: 'planet' | 'spacecraft') => void;
   timeScale: number;
+  showTags?: boolean;
 }
 
 export const SunBody: React.FC<SunBodyProps> = ({
@@ -19,6 +20,7 @@ export const SunBody: React.FC<SunBodyProps> = ({
   selectedId,
   onSelect,
   timeScale,
+  showTags = true,
 }) => {
   const sunMeshRef = useRef<THREE.Mesh>(null);
   const coronaRef = useRef<THREE.Mesh>(null);
@@ -102,6 +104,7 @@ export const SunBody: React.FC<SunBodyProps> = ({
     <group position={position}>
       {/* Central Sun Sphere with Photorealistic Radiant Surface */}
       <mesh
+        name="sun"
         ref={sunMeshRef}
         onClick={(e) => {
           e.stopPropagation();
@@ -173,6 +176,7 @@ export const SunBody: React.FC<SunBodyProps> = ({
         {/* Aditya-L1 Spacecraft */}
         {adityaMission && (
           <group
+            name="aditya-l1"
             ref={adityaRef}
             onClick={(e) => {
               e.stopPropagation();
@@ -181,10 +185,13 @@ export const SunBody: React.FC<SunBodyProps> = ({
           >
             <SpacecraftModel
               id="aditya-l1"
+              name="Aditya-L1"
               specs={adityaMission.specs}
               color={adityaMission.color}
               isSelected={isAdityaSelected}
-              scale={0.24}
+              scale={0.26}
+              showTag={showTags}
+              onClick={() => onSelect('aditya-l1', 'spacecraft')}
             />
           </group>
         )}

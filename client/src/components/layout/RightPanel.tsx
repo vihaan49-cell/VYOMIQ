@@ -51,7 +51,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({
   };
 
   return (
-    <aside className="absolute top-16 bottom-14 right-0 w-80 sm:w-[440px] z-20 glass-panel border-l border-space-600/40 flex flex-col backdrop-blur-2xl shadow-2xl animate-in slide-in-from-right duration-300 select-none">
+    <aside className="absolute top-0 bottom-14 right-0 w-80 sm:w-[440px] z-20 glass-panel border-l border-space-600/40 flex flex-col backdrop-blur-2xl shadow-2xl animate-in slide-in-from-right duration-300 select-none">
       {/* Header with Mission Title, Status & Close button */}
       <div className="p-3.5 border-b border-space-700/60 bg-space-900/80 flex items-start justify-between">
         <div className="flex items-start space-x-2.5">

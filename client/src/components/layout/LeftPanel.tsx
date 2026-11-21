@@ -59,7 +59,7 @@ export const LeftPanel: React.FC<LeftPanelProps> = ({
 
   return (
     <aside
-      className={`absolute top-16 bottom-14 left-0 z-20 transition-all duration-300 ease-in-out flex ${
+      className={`absolute top-0 bottom-14 left-0 z-20 transition-all duration-300 ease-in-out flex ${
         isOpen ? 'w-80 sm:w-96' : 'w-10'
       }`}
     >

@@ -12,6 +12,7 @@ interface MarsSystemProps {
   selectedId: string | null;
   onSelect: (id: string, type: 'planet' | 'spacecraft') => void;
   timeScale: number;
+  showTags?: boolean;
 }
 
 export const MarsSystem: React.FC<MarsSystemProps> = ({
@@ -20,6 +21,7 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
   selectedId,
   onSelect,
   timeScale,
+  showTags = true,
 }) => {
   const marsMeshRef = useRef<THREE.Mesh>(null);
   const momRef = useRef<THREE.Group>(null);
@@ -35,7 +37,6 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
       return getMarsTexture();
     }
   }, []);
-
   const momMission = useMemo(() => missions.find((m) => m.id === 'mangalyaan-1'), [missions]);
 
   const isMarsSelected = selectedId === 'mars';
@@ -78,6 +79,7 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
     <group position={position}>
       {/* Mars Sphere with Photorealistic Butterscotch & Basalt Texture */}
       <mesh
+        name="mars"
         ref={marsMeshRef}
         onClick={(e) => {
           e.stopPropagation();
@@ -88,9 +90,9 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
         <meshStandardMaterial
           map={marsTexture}
           bumpMap={marsTexture}
-          bumpScale={0.06}
-          roughness={0.85}
-          metalness={0.06}
+          bumpScale={0.05}
+          roughness={0.82}
+          metalness={0.05}
         />
       </mesh>
 
@@ -128,6 +130,7 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
         {/* Mangalyaan Spacecraft */}
         {momMission && (
           <group
+            name="mangalyaan-1"
             ref={momRef}
             onClick={(e) => {
               e.stopPropagation();
@@ -136,10 +139,13 @@ export const MarsSystem: React.FC<MarsSystemProps> = ({
           >
             <SpacecraftModel
               id="mangalyaan-1"
+              name="Mangalyaan (MOM)"
               specs={momMission.specs}
               color={momMission.color}
               isSelected={isMomSelected}
-              scale={0.20}
+              scale={0.22}
+              showTag={showTags}
+              onClick={() => onSelect('mangalyaan-1', 'spacecraft')}
             />
           </group>
         )}

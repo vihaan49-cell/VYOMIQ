@@ -20,7 +20,16 @@ import { spaceAudio } from './utils/audio';
 export const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<
     'home' | 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about'
-  >('home');
+  >(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const v = params.get('view');
+      if (v && ['home', 'universe', 'missions', 'observations', 'gallery', 'analytics', 'about'].includes(v)) {
+        return v as any;
+      }
+    }
+    return 'home';
+  });
 
   const [selectedId, setSelectedId] = useState<string | null>('chandrayaan-3');
   const [selectedType, setSelectedType] = useState<'planet' | 'spacecraft' | 'all' | null>(
@@ -86,12 +95,12 @@ export const App: React.FC = () => {
       setSelectedType('planet');
       setIsRightPanelOpen(true);
     } else if (preset === 'moon') {
-      setSelectedId('chandrayaan-3');
-      setSelectedType('spacecraft');
+      setSelectedId('moon');
+      setSelectedType('planet');
       setIsRightPanelOpen(true);
     } else if (preset === 'mars') {
-      setSelectedId('mangalyaan-1');
-      setSelectedType('spacecraft');
+      setSelectedId('mars');
+      setSelectedType('planet');
       setIsRightPanelOpen(true);
     }
   };
@@ -109,8 +118,19 @@ export const App: React.FC = () => {
     }
   };
 
-  // Currently active mission object (for Right Panel)
-  const activeMission = MISSIONS_DATA.find((m) => m.id === selectedId) || null;
+  // Currently active mission object (for Right Panel & Bottom Timeline)
+  const activeMission =
+    MISSIONS_DATA.find((m) => m.id === selectedId) ||
+    (selectedId === 'sun'
+      ? MISSIONS_DATA.find((m) => m.id === 'aditya-l1')
+      : selectedId === 'earth'
+      ? MISSIONS_DATA.find((m) => m.id === 'gaganyaan') || MISSIONS_DATA.find((m) => m.id === 'astrosat')
+      : selectedId === 'moon'
+      ? MISSIONS_DATA.find((m) => m.id === 'chandrayaan-3')
+      : selectedId === 'mars'
+      ? MISSIONS_DATA.find((m) => m.id === 'mangalyaan-1')
+      : null) ||
+    null;
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-space-950 text-slate-100 flex flex-col relative select-none">
@@ -132,14 +152,17 @@ export const App: React.FC = () => {
 
       {/* Main Center Area: 3D Universe Canvas or Sub-View */}
       <main className="flex-1 w-full h-[calc(100vh-4rem)] relative overflow-hidden">
-        {/* Central 3D Interactive Solar System Canvas */}
-        <UniverseCanvas
-          missions={MISSIONS_DATA}
-          selectedId={selectedId}
-          selectedType={selectedType}
-          onSelect={handleSelect}
-          timeScale={timeScale}
-        />
+        {/* Central 3D Interactive Solar System Canvas (rendered in 3D universe mode & as live glass backdrop on home) */}
+        {(currentView === 'universe' || currentView === 'home') && (
+          <UniverseCanvas
+            missions={MISSIONS_DATA}
+            selectedId={selectedId}
+            selectedType={selectedType}
+            onSelect={handleSelect}
+            timeScale={timeScale}
+            showTags={currentView === 'universe'}
+          />
+        )}
 
         {/* Left Mission Directory Panel (visible in universe view) */}
         {currentView === 'universe' && (
@@ -183,6 +206,10 @@ export const App: React.FC = () => {
               }
             }}
             onOpenSearch={() => setIsSearchOpen(true)}
+            timeScale={timeScale}
+            setTimeScale={setTimeScale}
+            onCameraPreset={handleCameraPreset}
+            activePreset={activePreset}
           />
         )}
 

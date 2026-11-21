@@ -1,29 +1,35 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { getSolarPanelTexture, getGoldFoilTexture } from '../../utils/textureGenerator';
 import { SpacecraftSpec } from '../../types';
+import { MISSIONS_DATA } from '../../data/missionsData';
 
 interface SpacecraftModelProps {
   id: string;
+  name?: string;
   specs?: SpacecraftSpec;
   color?: string;
   isSelected?: boolean;
   isHovered?: boolean;
   scale?: number;
   interactiveMode?: boolean;
-  onClick?: (e: THREE.Event) => void;
+  showTag?: boolean;
+  onClick?: (e?: any) => void;
   onPointerOver?: (e: THREE.Event) => void;
   onPointerOut?: (e: THREE.Event) => void;
 }
 
 export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
   id,
+  name,
   specs,
   color = '#06b6d4',
   isSelected = false,
   isHovered = false,
   scale = 1,
+  showTag = true,
   interactiveMode = false,
   onClick,
   onPointerOver,
@@ -31,6 +37,27 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
 }) => {
   const groupRef = useRef<THREE.Group>(null);
   const beaconRef = useRef<THREE.Mesh>(null);
+
+  // Clean, authentic satellite name label
+  const tagLabel = useMemo(() => {
+    if (name) return name;
+    const mission = MISSIONS_DATA.find((m) => m.id === id);
+    if (mission) {
+      if (mission.id === 'mangalyaan-1') return 'Mangalyaan (MOM)';
+      if (mission.id === 'chandrayaan-4') return 'Chandrayaan-4';
+      if (mission.id === 'oceansat-3') return 'EOS-06 Oceansat';
+      if (mission.id === 'navic-constellation') return 'NavIC IRNSS';
+      if (mission.id === 'risat-2b') return 'RISAT-2B';
+      return mission.name;
+    }
+    return id.toUpperCase();
+  }, [id, name]);
+
+  // Scaled height offset: floats consistently ~0.55 world units above satellite
+  const tagY = useMemo(() => {
+    const s = scale || 1;
+    return 0.45 / s + 0.35;
+  }, [scale]);
 
   const solarTexture = useMemo(() => getSolarPanelTexture(), []);
   const goldFoilTexture = useMemo(() => getGoldFoilTexture(), []);
@@ -504,6 +531,54 @@ export const SpacecraftModel: React.FC<SpacecraftModelProps> = ({
           <sphereGeometry args={[0.065, 12, 12]} />
           <meshBasicMaterial color={color} transparent opacity={1} />
         </mesh>
+      )}
+
+      {/* Floating 3D Satellite Name Tag */}
+      {showTag && !interactiveMode && (
+        <Html
+          position={[0, tagY, 0]}
+          center
+          zIndexRange={[100, 0]}
+          className="pointer-events-auto select-none"
+        >
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onClick) onClick(e);
+            }}
+            className="flex flex-col items-center group cursor-pointer"
+            title={`Click to focus on ${tagLabel}`}
+          >
+            {/* ISRO Telemetry Glassmorphic Badge */}
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border backdrop-blur-md transition-all duration-200 shadow-lg ${
+                isSelected
+                  ? 'bg-slate-900/95 border-amber-400 text-amber-200 shadow-amber-500/30 ring-2 ring-amber-400/50 scale-110 font-bold z-50'
+                  : 'bg-slate-950/80 border-slate-700/80 text-white hover:border-cyan-400 hover:text-cyan-200 hover:bg-slate-900/95 hover:scale-105'
+              }`}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse shrink-0"
+                style={{
+                  backgroundColor: isSelected ? '#fbbf24' : color,
+                  boxShadow: `0 0 6px ${isSelected ? '#fbbf24' : color}`,
+                }}
+              />
+              <span className="text-[11px] font-sans font-bold tracking-tight text-white whitespace-nowrap drop-shadow">
+                {tagLabel}
+              </span>
+            </div>
+
+            {/* Connecting stem line pointing down to craft */}
+            <div
+              className={`w-[1px] h-2.5 transition-colors duration-200 ${
+                isSelected
+                  ? 'bg-gradient-to-b from-amber-400/90 to-transparent'
+                  : 'bg-gradient-to-b from-slate-400/60 to-transparent group-hover:from-cyan-400/80'
+              }`}
+            />
+          </div>
+        </Html>
       )}
 
       {/* Hover / Selected Glowing Target Reticle (only in universe mode) */}

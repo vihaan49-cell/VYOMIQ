@@ -27,6 +27,10 @@ interface HomeViewProps {
   onEnterUniverse: (preset?: 'all' | 'sun' | 'earth' | 'moon' | 'mars', spacecraftId?: string) => void;
   onNavigate: (view: 'universe' | 'missions' | 'observations' | 'gallery' | 'analytics' | 'about') => void;
   onOpenSearch: () => void;
+  timeScale?: number;
+  setTimeScale?: (scale: number) => void;
+  onCameraPreset?: (preset: 'all' | 'sun' | 'earth' | 'moon' | 'mars') => void;
+  activePreset?: string | null;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -34,8 +38,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onEnterUniverse,
   onNavigate,
   onOpenSearch,
+  timeScale = 1,
+  setTimeScale,
+  onCameraPreset,
+  activePreset = 'moon',
 }) => {
   const [activeDestinationTab, setActiveDestinationTab] = useState<'moon' | 'mars' | 'sun' | 'earth'>('moon');
+  const [glassMode, setGlassMode] = useState<'deep' | 'clear' | 'peek'>('deep');
+
+  // Handle celestial destination selection: updates tab and swivels live 3D camera behind the glass
+  const handleDestinationClick = (dest: 'moon' | 'mars' | 'sun' | 'earth') => {
+    spaceAudio.playTargetLock();
+    setActiveDestinationTab(dest);
+    onCameraPreset?.(dest);
+  };
 
   // Featured flagship missions
   const featuredMissionIds = [
@@ -57,59 +73,136 @@ export const HomeView: React.FC<HomeViewProps> = ({
   };
 
   return (
-    <div className="absolute inset-0 z-20 overflow-y-auto bg-space-950/85 backdrop-blur-xl text-slate-100 custom-scrollbar select-none">
+    <div
+      className={`absolute inset-0 z-20 overflow-y-auto custom-scrollbar select-none transition-all duration-500 ${
+        glassMode === 'deep'
+          ? 'bg-space-950/65 backdrop-blur-2xl'
+          : glassMode === 'clear'
+          ? 'bg-space-950/30 backdrop-blur-md'
+          : 'bg-space-950/10 backdrop-blur-[2px]'
+      }`}
+    >
       {/* Background Cosmic Lighting & Nebula Gradients */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-isro-cyan/15 via-isro-amber/10 to-transparent rounded-full blur-3xl opacity-70" />
-        <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] bg-isro-blue/10 rounded-full blur-3xl opacity-50" />
-        <div className="absolute bottom-10 right-0 w-[700px] h-[600px] bg-isro-saffron/10 rounded-full blur-3xl opacity-40" />
-        <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:32px_32px] opacity-25" />
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" style={{ transform: 'translateZ(0)' }}>
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[550px] bg-gradient-to-b from-isro-cyan/20 via-isro-amber/15 to-transparent rounded-full blur-3xl opacity-75" />
+        <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] bg-isro-blue/15 rounded-full blur-3xl opacity-60" />
+        <div className="absolute bottom-10 right-0 w-[700px] h-[600px] bg-isro-saffron/15 rounded-full blur-3xl opacity-50" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-20">
         {/* ========================================================================= */}
         {/* 1. HERO SECTION */}
         {/* ========================================================================= */}
-        <section className="relative pt-6 pb-12 flex flex-col items-center text-center">
+        <section className="relative pt-4 pb-12 flex flex-col items-center text-center">
+          {/* Glass Mode Switcher & Live 3D Simulation Controls Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+            {/* Glass Backdrop Effect Selector */}
+            <div className="inline-flex items-center p-1 rounded-full bg-slate-900/80 border border-cyan-500/35 backdrop-blur-xl shadow-lg shadow-cyan-950/50">
+              <span className="text-[10px] font-bold text-slate-400 uppercase px-2.5 hidden sm:inline">
+                Glass Effect:
+              </span>
+              <button
+                onClick={() => {
+                  spaceAudio.playClick();
+                  setGlassMode('deep');
+                }}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  glassMode === 'deep'
+                    ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/60 shadow-glow-cyan'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Deep frosted glass effect with live 3D cosmos background"
+              >
+                🔮 Deep Frosted
+              </button>
+              <button
+                onClick={() => {
+                  spaceAudio.playClick();
+                  setGlassMode('clear');
+                }}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  glassMode === 'clear'
+                    ? 'bg-amber-500/25 text-amber-300 border border-amber-400/60 shadow-glow-orange'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Ultra-clear glass letting the 3D planetary orbits shine through"
+              >
+                ✨ Clear Glass
+              </button>
+              <button
+                onClick={() => {
+                  spaceAudio.playClick();
+                  setGlassMode('peek');
+                }}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  glassMode === 'peek'
+                    ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/60'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+                title="Minimal glass allowing live 3D universe inspection"
+              >
+                👁️ Space Peek
+              </button>
+            </div>
+
+            {/* Interactive 3D Warp Simulation Speed Dial */}
+            {setTimeScale && (
+              <div className="inline-flex items-center p-1 rounded-full bg-slate-900/80 border border-slate-700/60 backdrop-blur-xl shadow-lg">
+                <span className="text-[10px] font-bold text-slate-400 uppercase px-2.5 hidden sm:inline">
+                  3D Orbit Speed:
+                </span>
+                {[
+                  { label: 'Pause', val: 0 },
+                  { label: '1x', val: 1 },
+                  { label: '5x', val: 5 },
+                  { label: '15x', val: 15 },
+                ].map((s) => (
+                  <button
+                    key={s.label}
+                    onClick={() => {
+                      spaceAudio.playClick();
+                      setTimeScale(s.val);
+                    }}
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all ${
+                      timeScale === s.val
+                        ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Glowing Top Mission Control Badge */}
-          <div className="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-space-900/80 border border-isro-cyan/40 shadow-glow-cyan mb-8 backdrop-blur-md">
+          <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-space-900/80 border border-isro-cyan/40 shadow-glow-cyan mb-8 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-isro-cyan animate-pulse" />
-            <span className="text-[11px] font-mono tracking-widest text-cyan-300 font-semibold uppercase">
+            <span className="text-[11px] tracking-widest text-cyan-300 font-bold uppercase">
               ISRO UNIFIED SPACE EXPLORATION SUITE • VYOMIQ V2.0
             </span>
             <span className="text-slate-500">•</span>
-            <span className="text-[10px] font-mono text-isro-gold uppercase tracking-wider flex items-center">
+            <span className="text-[10px] text-isro-gold uppercase tracking-wider flex items-center font-bold">
               <Sparkles className="w-3 h-3 mr-1 text-isro-gold" />
               LIVE TELEMETRY
             </span>
           </div>
 
-          {/* Futuristic Hero Logo & Animated Orbital Rings */}
-          <div className="relative mb-8 group cursor-pointer" onClick={() => handleLaunch3D('all')}>
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-tr from-isro-amber via-isro-saffron to-isro-cyan p-[2px] shadow-glow-orange group-hover:scale-105 transition-transform duration-500">
-              <div className="w-full h-full bg-[#060b18] rounded-full flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-xl">
-                <span className="text-isro-saffron font-bold text-3xl sm:text-4xl tracking-tighter drop-shadow-md">
-                  व्योम
-                </span>
-                <span className="text-[9px] font-mono text-slate-400 tracking-widest uppercase mt-0.5">
-                  BHARAT SPACE
-                </span>
-              </div>
+          {/* Official VYOMIQ Logo Banner */}
+          <div className="relative mb-6 group cursor-pointer max-w-2xl w-full" onClick={() => handleLaunch3D('all')}>
+            <div className="relative rounded-2xl overflow-hidden border border-cyan-500/40 shadow-2xl shadow-cyan-950/60 p-1.5 bg-gradient-to-tr from-cyan-500/20 via-slate-900/90 to-amber-500/20 group-hover:border-cyan-400 group-hover:shadow-cyan-500/30 transition-all duration-300">
+              <img
+                src="/images/vyomiq_logo.jpg"
+                alt="VYOMIQ - Space Data Analysis & Visualization Tool"
+                className="w-full h-auto object-contain rounded-xl transform group-hover:scale-[1.01] transition-transform duration-300"
+              />
             </div>
-            {/* Concentric rotating orbital rings */}
-            <div className="absolute -inset-4 rounded-full border border-isro-cyan/30 animate-orbit pointer-events-none" />
-            <div className="absolute -inset-8 rounded-full border border-dashed border-isro-amber/25 animate-spin-slow pointer-events-none" />
-            <div className="absolute -inset-12 rounded-full border border-slate-700/30 pointer-events-none" />
           </div>
 
           {/* Main Title & Tagline */}
-          <div className="max-w-4xl space-y-4">
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight font-mono">
-              <span className="bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent">
-                VYOMIQ
-              </span>
-            </h1>
-            <p className="text-base sm:text-xl font-mono text-isro-amber tracking-wider font-semibold">
+          <div className="max-w-4xl space-y-3 mt-2">
+            <p className="text-base sm:text-xl text-isro-amber tracking-wider font-semibold">
               VISUALIZING YOUR MISSIONS, OBSERVATIONS, INSIGHTS & QUANTIFICATION
             </p>
             <p className="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
@@ -166,100 +259,126 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </section>
 
         {/* ========================================================================= */}
-        {/* 2. LIVE MISSION STATS STRIP (GLASS CARDS) */}
+        {/* 2. LIVE MISSION STATS STRIP (INTERACTIVE GLASS CARDS) */}
         {/* ========================================================================= */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner">
+          <div
+            onClick={() => handleLaunch3D('all')}
+            className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner cursor-pointer group"
+            title="Click to launch full 3D Solar System view"
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Missions Tracked</span>
-              <Globe2 className="w-4 h-4 text-isro-cyan" />
+              <span className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Missions Tracked</span>
+              <Globe2 className="w-4 h-4 text-isro-cyan group-hover:scale-125 transition-transform" />
             </div>
-            <div className="text-3xl font-extrabold font-mono text-white tracking-tight">14+</div>
-            <div className="text-xs text-slate-400 mt-1">Lunar, Mars, Solar, Astronomy & Earth Satellites</div>
+            <div className="text-3xl font-extrabold text-white tracking-tight group-hover:text-cyan-300 transition-colors">14+</div>
+            <div className="text-xs text-slate-300 mt-1">Lunar, Mars, Solar, Astronomy & Earth Satellites</div>
           </div>
 
-          <div className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner">
+          <div
+            onClick={() => { spaceAudio.playClick(); onNavigate('observations'); }}
+            className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner cursor-pointer group"
+            title="Click to open Scientific Observations catalogue"
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Scientific Instruments</span>
-              <Zap className="w-4 h-4 text-isro-gold" />
+              <span className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Scientific Instruments</span>
+              <Zap className="w-4 h-4 text-isro-gold group-hover:scale-125 transition-transform" />
             </div>
-            <div className="text-3xl font-extrabold font-mono text-isro-gold tracking-tight">35+</div>
-            <div className="text-xs text-slate-400 mt-1">Spectrometers, Radars, Cameras & Magnetometers</div>
+            <div className="text-3xl font-extrabold text-isro-gold tracking-tight group-hover:text-amber-300 transition-colors">35+</div>
+            <div className="text-xs text-slate-300 mt-1">Spectrometers, Radars, Cameras & Magnetometers</div>
           </div>
 
-          <div className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner">
+          <div
+            onClick={() => { spaceAudio.playClick(); onNavigate('about'); }}
+            className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner cursor-pointer group"
+            title="Click to view Scientific Data Integrity & Tenets"
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Scientific Integrity</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Scientific Integrity</span>
+              <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-125 transition-transform" />
             </div>
-            <div className="text-3xl font-extrabold font-mono text-emerald-400 tracking-tight">100%</div>
-            <div className="text-xs text-slate-400 mt-1">Verified ISRO, ISSDC & PRADAN Datasets</div>
+            <div className="text-3xl font-extrabold text-emerald-400 tracking-tight group-hover:text-emerald-300 transition-colors">100%</div>
+            <div className="text-xs text-slate-300 mt-1">Verified ISRO, ISSDC & PRADAN Datasets</div>
           </div>
 
-          <div className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner">
+          <div
+            onClick={() => handleLaunch3D('moon', 'chandrayaan-3')}
+            className="glass-interactive-card p-5 rounded-2xl relative overflow-hidden hud-corner cursor-pointer group"
+            title="Click to track Chandrayaan-3 at Shiv Shakti Point"
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Historic Feat</span>
-              <Award className="w-4 h-4 text-isro-amber" />
+              <span className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Historic Feat</span>
+              <Award className="w-4 h-4 text-isro-amber group-hover:scale-125 transition-transform" />
             </div>
-            <div className="text-3xl font-extrabold font-mono text-isro-amber tracking-tight">1st</div>
-            <div className="text-xs text-slate-400 mt-1">Human Soft Landing at Lunar South Pole</div>
+            <div className="text-3xl font-extrabold text-isro-amber tracking-tight group-hover:text-amber-300 transition-colors">1st</div>
+            <div className="text-xs text-slate-300 mt-1">Human Soft Landing at Lunar South Pole</div>
           </div>
         </section>
 
         {/* ========================================================================= */}
-        {/* 3. CELESTIAL GATEWAY (EXPLORE BY DESTINATION) */}
+        {/* 3. CELESTIAL GATEWAY (INTERACTIVE DESTINATION NAVIGATION) */}
         {/* ========================================================================= */}
         <section className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-space-700/60 pb-4">
             <div>
-              <div className="inline-flex items-center space-x-2 text-isro-cyan text-xs font-mono font-semibold tracking-wider uppercase mb-1">
+              <div className="inline-flex items-center space-x-2 text-isro-cyan text-xs font-bold tracking-wider uppercase mb-1">
                 <Compass className="w-3.5 h-3.5" />
-                <span>Planetary Navigation</span>
+                <span>Interactive Planetary Navigation</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
                 Explore by Celestial Destination
               </h2>
             </div>
-            <div className="flex items-center space-x-1 bg-space-900/90 p-1 rounded-xl border border-space-700/60">
+            <div className="flex items-center space-x-1.5 bg-space-900/90 p-1.5 rounded-xl border border-space-700/60 backdrop-blur-xl">
               <button
-                onClick={() => setActiveDestinationTab('moon')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                onClick={() => handleDestinationClick('moon')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeDestinationTab === 'moon'
-                    ? 'bg-isro-cyan/20 text-white border border-isro-cyan/40 shadow-glow-cyan'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-isro-cyan/25 text-white border border-isro-cyan/60 shadow-glow-cyan'
+                    : 'text-slate-400 hover:text-white hover:bg-space-800/60'
                 }`}
               >
-                Moon
+                🌕 Moon
               </button>
               <button
-                onClick={() => setActiveDestinationTab('mars')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                onClick={() => handleDestinationClick('mars')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeDestinationTab === 'mars'
-                    ? 'bg-rose-500/20 text-white border border-rose-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-rose-500/25 text-white border border-rose-500/60 shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-space-800/60'
                 }`}
               >
-                Mars
+                🪐 Mars
               </button>
               <button
-                onClick={() => setActiveDestinationTab('sun')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                onClick={() => handleDestinationClick('sun')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeDestinationTab === 'sun'
-                    ? 'bg-isro-amber/20 text-white border border-isro-amber/40 shadow-glow-orange'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-isro-amber/25 text-white border border-isro-amber/60 shadow-glow-orange'
+                    : 'text-slate-400 hover:text-white hover:bg-space-800/60'
                 }`}
               >
-                Sun (L1)
+                ☀️ Sun (L1)
               </button>
               <button
-                onClick={() => setActiveDestinationTab('earth')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+                onClick={() => handleDestinationClick('earth')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeDestinationTab === 'earth'
-                    ? 'bg-blue-500/20 text-white border border-blue-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-blue-500/25 text-white border border-blue-500/60 shadow-sm'
+                    : 'text-slate-400 hover:text-white hover:bg-space-800/60'
                 }`}
               >
-                Earth Orbit
+                🌍 Earth Orbit
+              </button>
+              <button
+                onClick={() => {
+                  spaceAudio.playTargetLock();
+                  onCameraPreset?.('all');
+                }}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:bg-space-800/60 transition-all"
+                title="View complete solar system overview"
+              >
+                🌌 All Cosmos
               </button>
             </div>
           </div>

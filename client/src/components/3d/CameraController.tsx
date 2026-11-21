@@ -9,70 +9,140 @@ interface CameraControllerProps {
   selectedType: 'planet' | 'spacecraft' | 'all' | null;
 }
 
+// Camera offset vector relative to target world position
+function getCameraOffset(id: string | null, type: string | null): THREE.Vector3 {
+  if (!id || type === 'all') {
+    return new THREE.Vector3(0, 34, 60);
+  }
+  if (id === 'sun') {
+    return new THREE.Vector3(0, 8, 22);
+  }
+  if (id === 'earth') {
+    return new THREE.Vector3(0, 3.5, 7.5);
+  }
+  if (id === 'moon') {
+    return new THREE.Vector3(0, 2.2, 3.8);
+  }
+  if (id === 'chandrayaan-3') {
+    return new THREE.Vector3(0.8, 0.6, 1.2);
+  }
+  if (id === 'mars') {
+    return new THREE.Vector3(0, 3.5, 6.5);
+  }
+  if (id === 'aditya-l1') {
+    return new THREE.Vector3(0.9, 0.8, 1.3);
+  }
+  if (id === 'mangalyaan-1') {
+    return new THREE.Vector3(0.9, 0.8, 1.3);
+  }
+  // Lunar polar orbiters
+  if (id === 'chandrayaan-1' || id === 'chandrayaan-2' || id === 'chandrayaan-4') {
+    return new THREE.Vector3(0.9, 0.7, 1.4);
+  }
+  if (id.startsWith('chandrayaan')) {
+    return new THREE.Vector3(0.8, 0.7, 1.1);
+  }
+  // Default Earth orbiting satellites
+  return new THREE.Vector3(0.8, 0.7, 1.1);
+}
+
+// Fallback positions before Three.js scene tree is fully mounted
+function getFallbackPosition(id: string | null): THREE.Vector3 {
+  if (!id) return new THREE.Vector3(25, 0, 8);
+  if (id === 'sun') return new THREE.Vector3(0, 0, 0);
+  if (id === 'earth') return new THREE.Vector3(36, 0, 0);
+  if (id === 'moon' || id.startsWith('chandrayaan')) return new THREE.Vector3(45.5, 0, 0);
+  if (id === 'mars' || id === 'mangalyaan-1') return new THREE.Vector3(56, 0, 18);
+  if (id === 'aditya-l1') return new THREE.Vector3(22, 0, 0);
+  return new THREE.Vector3(36, 0, 0);
+}
+
 export const CameraController: React.FC<CameraControllerProps> = ({
   selectedId,
   selectedType,
 }) => {
-  const { camera } = useThree();
+  const { camera, scene } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
-  // Target camera position and lookAt vectors
-  const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(25, 30, 60));
   const targetLook = useRef<THREE.Vector3>(new THREE.Vector3(25, 0, 8));
+  const targetPos = useRef<THREE.Vector3>(new THREE.Vector3(25, 34, 68));
   const isTransitioning = useRef<boolean>(true);
+  const lastWorldPos = useRef<THREE.Vector3 | null>(null);
 
+  // Trigger smooth transition whenever target changes
   useEffect(() => {
     isTransitioning.current = true;
+    lastWorldPos.current = null;
 
     if (!selectedId || selectedType === 'all') {
-      // Full Solar System Overview
-      targetPos.current.set(25, 32, 65);
       targetLook.current.set(25, 0, 8);
-    } else if (selectedId === 'sun') {
-      targetPos.current.set(0, 5, 20);
-      targetLook.current.set(0, 0, 0);
-    } else if (selectedId === 'aditya-l1') {
-      targetPos.current.set(23, 2, 5);
-      targetLook.current.set(22, 0, 0);
-    } else if (selectedId === 'earth') {
-      targetPos.current.set(36, 3, 7);
-      targetLook.current.set(36, 0, 0);
-    } else if (selectedId === 'moon') {
-      targetPos.current.set(45.5, 2.5, 4.5);
-      targetLook.current.set(45.5, 0, 0);
-    } else if (selectedId === 'chandrayaan-3') {
-      // Close up of South Pole / Shiv Shakti Point
-      targetPos.current.set(45.8, -0.4, 2.0);
-      targetLook.current.set(45.7, -0.7, 0.3);
-    } else if (selectedId === 'chandrayaan-2' || selectedId === 'chandrayaan-1' || selectedId === 'chandrayaan-4') {
-      targetPos.current.set(45.5, 3, 5);
-      targetLook.current.set(45.5, 0, 0);
-    } else if (selectedId === 'mars') {
-      targetPos.current.set(56, 4, 24);
-      targetLook.current.set(56, 0, 18);
-    } else if (selectedId === 'mangalyaan-1') {
-      targetPos.current.set(57, 4, 23);
-      targetLook.current.set(56, 0, 18);
+      targetPos.current.set(25, 34, 68);
     } else {
-      // Default Earth Orbiting Satellites (AstroSat, XPoSat, Cartosat, etc.)
-      targetPos.current.set(37.5, 2.5, 5.5);
-      targetLook.current.set(36, 0, 0);
+      const obj = scene.getObjectByName(selectedId);
+      const pos = obj ? new THREE.Vector3() : getFallbackPosition(selectedId);
+      if (obj) obj.getWorldPosition(pos);
+
+      const offset = getCameraOffset(selectedId, selectedType);
+      targetLook.current.copy(pos);
+      targetPos.current.copy(pos).add(offset);
     }
-  }, [selectedId, selectedType]);
+  }, [selectedId, selectedType, scene]);
 
   useFrame((_, delta) => {
-    if (controlsRef.current && isTransitioning.current) {
-      // Smooth damp lerp towards target
-      camera.position.lerp(targetPos.current, delta * 3.0);
-      controlsRef.current.target.lerp(targetLook.current, delta * 3.0);
-      controlsRef.current.update();
+    if (!controlsRef.current) return;
 
-      // End auto-transition when camera is close to destination
-      if (
-        camera.position.distanceTo(targetPos.current) < 0.2 &&
-        controlsRef.current.target.distanceTo(targetLook.current) < 0.1
-      ) {
-        isTransitioning.current = false;
+    if (selectedId && selectedType !== 'all') {
+      const obj = scene.getObjectByName(selectedId);
+      if (obj) {
+        const currentWorldPos = new THREE.Vector3();
+        obj.getWorldPosition(currentWorldPos);
+
+        const offset = getCameraOffset(selectedId, selectedType);
+
+        if (isTransitioning.current) {
+          // Dynamic tracking: update target vectors continuously while object orbits
+          targetLook.current.copy(currentWorldPos);
+          targetPos.current.copy(currentWorldPos).add(offset);
+
+          const step = Math.min(delta * 4.0, 0.2);
+          camera.position.lerp(targetPos.current, step);
+          controlsRef.current.target.lerp(targetLook.current, step);
+
+          if (
+            camera.position.distanceTo(targetPos.current) < 0.25 &&
+            controlsRef.current.target.distanceTo(targetLook.current) < 0.15
+          ) {
+            camera.position.copy(targetPos.current);
+            controlsRef.current.target.copy(targetLook.current);
+            isTransitioning.current = false;
+          }
+        } else {
+          // Locked orbit tracking: adjust camera position & controls target by orbital translation delta
+          if (lastWorldPos.current) {
+            const deltaMove = currentWorldPos.clone().sub(lastWorldPos.current);
+            if (deltaMove.length() < 6) {
+              controlsRef.current.target.add(deltaMove);
+              camera.position.add(deltaMove);
+            }
+          }
+        }
+        lastWorldPos.current = currentWorldPos;
+      }
+    } else {
+      // Solar system overview mode
+      if (isTransitioning.current) {
+        const step = Math.min(delta * 3.5, 0.15);
+        camera.position.lerp(targetPos.current, step);
+        controlsRef.current.target.lerp(targetLook.current, step);
+
+        if (
+          camera.position.distanceTo(targetPos.current) < 0.3 &&
+          controlsRef.current.target.distanceTo(targetLook.current) < 0.2
+        ) {
+          camera.position.copy(targetPos.current);
+          controlsRef.current.target.copy(targetLook.current);
+          isTransitioning.current = false;
+        }
       }
     }
   });
@@ -85,10 +155,10 @@ export const CameraController: React.FC<CameraControllerProps> = ({
       rotateSpeed={0.8}
       zoomSpeed={1.0}
       panSpeed={0.8}
-      minDistance={1.2}
-      maxDistance={180}
+      minDistance={0.5}
+      maxDistance={220}
+      target={[25, 0, 8]}
       onStart={() => {
-        // If user manually grabs controls, pause transition
         isTransitioning.current = false;
       }}
     />

@@ -12,6 +12,7 @@ interface MoonSystemProps {
   selectedId: string | null;
   onSelect: (id: string, type: 'planet' | 'spacecraft') => void;
   timeScale: number;
+  showTags?: boolean;
 }
 
 export const MoonSystem: React.FC<MoonSystemProps> = ({
@@ -20,6 +21,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
   selectedId,
   onSelect,
   timeScale,
+  showTags = true,
 }) => {
   const moonGroupRef = useRef<THREE.Group>(null);
   const moonMeshRef = useRef<THREE.Mesh>(null);
@@ -89,7 +91,9 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
 
         const vx = -r * Math.sin(theta);
         const vy = -r * Math.cos(theta);
-        group.lookAt(x + vx, y + vy, z);
+        const targetLocal = new THREE.Vector3(x + vx, y + vy, z);
+        const targetWorld = group.parent ? group.parent.localToWorld(targetLocal.clone()) : targetLocal;
+        group.lookAt(targetWorld);
       }
     });
   });
@@ -101,7 +105,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
   const sspZ = 0.169;
 
   return (
-    <group ref={moonGroupRef} position={[earthPosition[0] + 9.5, 0, 0]}>
+    <group ref={moonGroupRef} name="moon" position={[earthPosition[0] + 9.5, 0, 0]}>
       {/* Moon Center Sphere with high-contrast authentic LRO surface */}
       <mesh
         ref={moonMeshRef}
@@ -129,7 +133,7 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
       )}
 
       {/* SHIV SHAKTI POINT - Chandrayaan-3 Landing Site Marker */}
-      <group position={[sspX, sspY, sspZ]}>
+      <group name="chandrayaan-3" position={[sspX, sspY, sspZ]}>
         {/* Glowing Pin Beacon */}
         <mesh
           onClick={(e) => {
@@ -165,19 +169,25 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
           >
             <SpacecraftModel
               id="chandrayaan-3"
+              name="Chandrayaan-3"
               specs={ch3.specs}
               color={ch3.color}
               isSelected={selectedId === 'chandrayaan-3'}
+              showTag={showTags}
+              onClick={() => onSelect('chandrayaan-3', 'spacecraft')}
             />
           </group>
         )}
       </group>
 
       {/* Lunar Orbiting Missions (Chandrayaan-1, Chandrayaan-2, Chandrayaan-4) */}
-      {lunarMissions.map((m) => {
+      {lunarMissions.map((m, idx) => {
         if (m.id === 'chandrayaan-3') return null; // Landed on surface
         const isSelected = selectedId === m.id;
         const radius = getLunarOrbitRadius(m.id);
+        const thetaInit = (idx * Math.PI) / 2;
+        const initX = radius * Math.cos(thetaInit);
+        const initY = -radius * Math.sin(thetaInit);
 
         return (
           <React.Fragment key={m.id}>
@@ -192,6 +202,8 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
 
             {/* Spacecraft Model */}
             <group
+              name={m.id}
+              position={[initX, initY, 0]}
               ref={(el) => (orbiterRefs.current[m.id] = el)}
               onClick={(e) => {
                 e.stopPropagation();
@@ -200,10 +212,13 @@ export const MoonSystem: React.FC<MoonSystemProps> = ({
             >
               <SpacecraftModel
                 id={m.id}
+                name={m.name}
                 specs={m.specs}
                 color={m.color}
                 isSelected={isSelected}
-                scale={0.16}
+                scale={0.18}
+                showTag={showTags}
+                onClick={() => onSelect(m.id, 'spacecraft')}
               />
             </group>
           </React.Fragment>

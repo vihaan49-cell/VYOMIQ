@@ -26,8 +26,9 @@ export default {
         }
       },
       fontFamily: {
-        mono: ['"JetBrains Mono"', 'Menlo', 'Consolas', 'monospace'],
-        sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Michroma"', '"MYCHROMA"', '"Space Grotesk"', '"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Michroma"', '"MYCHROMA"', '"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['"Michroma"', '"MYCHROMA"', '"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
         'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.4)',

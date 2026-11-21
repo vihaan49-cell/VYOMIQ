@@ -87,34 +87,20 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Left: Project Branding & Emblem */}
       <div className="flex items-center space-x-3.5">
         <div
-          className="flex items-center space-x-2.5 cursor-pointer group"
+          className="flex items-center space-x-3 cursor-pointer group"
           onClick={() => {
             spaceAudio.playClick();
             onNavigate('universe');
             onCameraPreset('all');
           }}
         >
-          {/* Animated Chakra / ISRO Orange Emblem */}
-          <div className="relative w-9 h-9 rounded-full bg-gradient-to-tr from-isro-amber to-isro-cyan p-[1.5px] shadow-glow-orange group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-[#080e1e] rounded-full flex items-center justify-center overflow-hidden">
-              <span className="text-isro-saffron font-bold text-sm tracking-tighter">व्योम</span>
-            </div>
-            {/* Pulsing ring */}
-            <div className="absolute inset-0 rounded-full border border-isro-cyan/50 animate-ping opacity-20 pointer-events-none" />
-          </div>
-
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-extrabold tracking-widest bg-gradient-to-r from-white via-slate-200 to-isro-cyan bg-clip-text text-transparent font-mono">
-                VYOMIQ
-              </h1>
-              <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-isro-amber/20 text-isro-amber border border-isro-amber/30 uppercase tracking-wider">
-                ISRO Unified
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400 font-mono tracking-tight hidden sm:block">
-              VISUALIZING YOUR MISSIONS, OBSERVATIONS & INSIGHTS
-            </p>
+          {/* Official VYOMIQ Logo Badge */}
+          <div className="relative h-11 py-0.5 flex items-center">
+            <img
+              src="/images/vyomiq_logo.jpg"
+              alt="VYOMIQ - Space Data Analysis & Visualization Tool"
+              className="h-10 w-auto max-w-[210px] sm:max-w-[260px] object-contain rounded-lg border border-cyan-500/30 shadow-md shadow-cyan-950/40 group-hover:border-cyan-400 group-hover:shadow-cyan-500/30 transition-all duration-300"
+            />
           </div>
         </div>
 

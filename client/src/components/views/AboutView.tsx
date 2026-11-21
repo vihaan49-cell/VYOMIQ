@@ -18,19 +18,26 @@ export const AboutView: React.FC = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header Banner */}
         <div className="glass-panel p-6 sm:p-8 rounded-2xl border border-isro-cyan/40 relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 space-y-3">
-            <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-isro-amber animate-ping" />
-              <span className="text-xs font-mono font-bold text-isro-amber uppercase tracking-widest">
-                PROJECT VYOMIQ
-              </span>
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
+            <img
+              src="/images/vyomiq_logo.jpg"
+              alt="VYOMIQ - Space Data Analysis & Visualization Tool"
+              className="w-full md:w-80 h-auto rounded-xl border border-cyan-500/40 shadow-xl object-contain shrink-0"
+            />
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-isro-amber animate-ping" />
+                <span className="text-xs font-sans font-bold text-isro-amber uppercase tracking-widest">
+                  PROJECT VYOMIQ
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold font-sans tracking-tight text-white">
+                Space Data Analysis & Visualization Tool
+              </h1>
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans">
+                A unified digital gateway to India's space exploration heritage. Designed to make the cosmos accessible through an interactive 3D solar system, authentic ISRO scientific observation archives, and precision spacecraft engineering models.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-extrabold font-mono tracking-wider text-white">
-              Visualizing Your Missions, Observations, Insights and Quantification
-            </h1>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-sans max-w-2xl">
-              A unified digital gateway to India's space exploration heritage. Designed to make the cosmos accessible through an interactive 3D solar system, authentic ISRO scientific observation archives, and precision spacecraft engineering models.
-            </p>
           </div>
 
           {/* Decorative glowing gradient ring */}

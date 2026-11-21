@@ -1,7 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { getEarthTexture, getEarthCloudTexture } from '../../utils/textureGenerator';
+import { getEarthTexture, getEarthCloudTexture, getEarthSpecularMap } from '../../utils/textureGenerator';
 import { SpacecraftModel } from './SpacecraftModel';
 import { OrbitPath } from './OrbitPath';
 import { Mission } from '../../types';
@@ -12,6 +12,7 @@ interface EarthSystemProps {
   selectedId: string | null;
   onSelect: (id: string, type: 'planet' | 'spacecraft') => void;
   timeScale: number;
+  showTags?: boolean;
 }
 
 export const EarthSystem: React.FC<EarthSystemProps> = ({
@@ -20,6 +21,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
   selectedId,
   onSelect,
   timeScale,
+  showTags = true,
 }) => {
   const earthMeshRef = useRef<THREE.Mesh>(null);
   const cloudsMeshRef = useRef<THREE.Mesh>(null);
@@ -122,6 +124,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
       <group rotation={[0.41, 0, 0]}>
         {/* Photorealistic Surface Mesh */}
         <mesh
+          name="earth"
           ref={earthMeshRef}
           onClick={(e) => {
             e.stopPropagation();
@@ -190,6 +193,7 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
 
             {/* Spacecraft Node */}
             <group
+              name={m.id}
               ref={(el) => (satRefs.current[m.id] = el)}
               onClick={(e) => {
                 e.stopPropagation();
@@ -198,10 +202,13 @@ export const EarthSystem: React.FC<EarthSystemProps> = ({
             >
               <SpacecraftModel
                 id={m.id}
+                name={m.name}
                 specs={m.specs}
                 color={m.color}
                 isSelected={isSelected}
-                scale={0.18}
+                scale={0.20}
+                showTag={showTags}
+                onClick={() => onSelect(m.id, 'spacecraft')}
               />
             </group>
           </React.Fragment>
